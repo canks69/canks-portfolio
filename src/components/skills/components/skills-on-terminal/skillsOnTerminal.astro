@@ -4,32 +4,21 @@ import Terminal from '../terminal/Terminal.astro';
 import './skills-on-terminal.css';
 ---
 
-<Terminal nombre="jhonDoe">
+<Terminal nombre="canks">
 	<div class="terminal__skills">
-		<h2>Mis habilidades</h2>
+		<!-- <h2>Keterampilan Saya</h2> -->
 		<div class="terminal__skills__container">
-			<TerminalIcon
-				src="/assets/bootstrap.svg"
-				color="#7738ff"
-				name="Bootstrap"
-			/>
-			<TerminalIcon
-				src="/assets/angular.svg"
-				color="#FF4747"
-				name="Angular"
-			/>
-			<TerminalIcon
-				src="/assets/react.svg"
-				color="#00D1FF"
-				name="React"
-			/>
+			<TerminalIcon src="/assets/bootstrap.svg" color="#7738ff" name="Bootstrap"/>
+			<TerminalIcon src="/assets/tailwind.svg" color="#38BDF8" name="TailwindCSS"/>
+			<TerminalIcon src="/assets/angular.svg" color="#FF4747" name="Angular"/>
+			<TerminalIcon src="/assets/react.svg" color="#00D1FF" name="React"/>
+			<TerminalIcon src="/assets/svelte.svg" color="#FF3E00" name="Svelte"/>
+			<TerminalIcon src="/assets/vue.svg" color="#42B883" name="VueJS"/>
+			<TerminalIcon src="/assets/nodejs.svg" color="#83CD29" name="NodeJS"/>
 			<TerminalIcon src="/assets/bun.svg" color="#F3CBC2" name="Bun" />
-			<TerminalIcon src="/assets/css.svg" color="#00A3FF" name="CSS" />
-			<TerminalIcon
-				src="/assets/electron.svg"
-				color="#3F75FF"
-				name="Electron"
-			/>
+			<TerminalIcon src="/assets/golang.svg" color="#00ADD8" name="Golang"/>
+			<TerminalIcon src="/assets/mysql.svg" color="#FF4D4D" name="MySQL"/>
+			<TerminalIcon src="/assets/mongodb.svg" color="#47A248" name="MongoDB"/>
 		</div>
 	</div>
 </Terminal>

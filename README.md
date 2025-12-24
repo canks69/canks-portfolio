@@ -1,40 +1,40 @@
-### start using this template by running:
- `npm create astro@latest -- --template SofiDevO/portfolio-sofidev-garrux`
-# Portfolio Template with Astro
+# Portfolio Full Stack - Astro Template
 
-Welcome to the Portfolio Template built with Astro! This responsive template allows you to showcase all your projects with an amazing UI. Below you'll find instructions on how to use this template, including how to add new portfolio items, main dependencies, and examples of usage.
+Selamat datang di repository **Portfolio Full Stack** saya. Project ini dibangun menggunakan **Astro** dan dirancang untuk menampilkan berbagai proyek yang pernah saya kerjakan, mulai dari aplikasi web, sistem ERP, hingga aplikasi enterprise. Portfolio ini memiliki tampilan yang modern, responsif, dan fokus pada performa serta kemudahan navigasi.
 
-![Portada](image-1.png)
-## Table of Contents
+Di repository ini, kamu bisa menemukan informasi mengenai struktur project, cara menambahkan data portfolio, teknologi yang digunakan, serta contoh implementasi yang digunakan dalam pengembangan aplikasi ini.
 
-1. [Usage](#usage)
-2. [Portfolio Data Format](#portfolio-data-format)
-3. [Adding Icons with Iconify](#adding-icons-with-iconify)
-4. [Technologies Used](#technologies-used)
-5. [Figma Design](#figma-design)
-6. [Author and License](#author-and-license)
-7. [Bugs and Issues](#bugs-and-issues)
-8. [Homepage](#homepage)
+![Canks](image.png)
 
-## Usage
+## Daftar Isi
 
-To add new elements to your portfolio, you need to add them in `/src/data/portfolioData.js`.
+1. [Cara Penggunaan](#cara-penggunaan)
+2. [Format Data Portfolio](#format-data-portfolio)
+3. [Menambahkan Icon dengan Iconify](#menambahkan-icon-dengan-iconify)
+4. [Teknologi yang Digunakan](#teknologi-yang-digunakan)
+5. [Desain Figma](#desain-figma)
+6. [Bug dan Permasalahan](#bug-dan-permasalahan)
+7. [Halaman Utama](#halaman-utama)
 
-## Portfolio Data Format
+## Cara Penggunaan
 
-The data for your portfolio should follow this format:
+Untuk menambahkan proyek baru ke dalam portfolio, silakan tambahkan data proyek pada file `/src/data/portfolioData.js`.
+
+## Format Data Portfolio
+
+Data portfolio harus mengikuti format berikut:
 
 ```js
 /**
  * @typedef PortfolioData
- * @property {string} imgSrc - URL of the image
- * @property {string} title - Title of the card
- * @property {string[]} skills - Array of your skills, e.g., ['React', 'CSS', 'JavaScript']
- * @property {string} description - Description of the card
- * @property {string} demoURL - URL of a demo page
- * @property {string} repoURL - URL of the repository, e.g., https://github.com/user/repo
- * @property {string} anim - Animation that will play when the card loads, e.g., fade-up, fade-right, fade-left, fade-down
- * @property {number} averageBrightness - Brightness level of the card's background color, e.g., 0.1
+ * @property {string} imgSrc - URL atau path gambar proyek
+ * @property {string} title - Judul card / nama proyek
+ * @property {string[]} skills - Daftar teknologi yang digunakan, contoh: ['React', 'CSS', 'JavaScript']
+ * @property {string} description - Deskripsi singkat proyek
+ * @property {string} demoURL - URL demo aplikasi (jika ada)
+ * @property {string} repoURL - URL repository, contoh: https://github.com/username/repo
+ * @property {string} anim - Animasi saat card ditampilkan, contoh: fade-up, fade-right, fade-left, fade-down
+ * @property {number} averageBrightness - Tingkat kecerahan background card (opsional), contoh: 0.1
  */
 
 /**
@@ -43,24 +43,24 @@ The data for your portfolio should follow this format:
 export const portfolioData = [
     {
         imgSrc: 'https://dt2sdf0db8zob.cloudfront.net/wp-content/uploads/2021/06/copy-of-the-6-best-restaurant-website-templates-1.png',
-        title: 'Restaurant',
+        title: 'Restaurant System',
         skills: ['React', 'StyledComponents'],
-        description: 'Laboris ex laboris mollit esse fugiat aute cillum nostrud enim dolor sit. Reprehenderit et non nulla irure aute nostrud commodo aute.',
+        description: 'Aplikasi manajemen restoran dengan tampilan modern dan responsif.',
         demoURL: '',
         repoURL: '',
         anim: 'fade-right',
     },
     {
         imgSrc: 'https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs/299377097/original/7eb7dcebe244fcf5ad75d92b0969fc116946bd57/create-professional-amd-responsive-wordpress-website.jpg',
-        title: 'E-commerce',
+        title: 'E-Commerce',
         skills: ['JavaScript', 'Bootstrap'],
-        description: 'Laboris ex laboris mollit esse fugiat aute cillum nostrud enim dolor sit. Reprehenderit et non nulla irure aute nostrud commodo aute.',
+        description: 'Platform e-commerce untuk pengelolaan produk, transaksi, dan pelanggan.',
         demoURL: '',
         repoURL: '',
         anim: 'fade-up',
         averageBrightness: 0.1,
     },
-    // Add more portfolio items here
+    // Tambahkan data portfolio lainnya di sini
 ];
 
 const skillIcons = {
@@ -75,7 +75,7 @@ const skillIcons = {
 };
 
 /**
- * @description Maps portfolioData to include skill icons
+ * @description Mengubah data portfolio dengan menambahkan icon pada setiap skill
  */
 export const getPortfolioData = portfolioData.map((item) => ({
     ...item,
@@ -84,23 +84,23 @@ export const getPortfolioData = portfolioData.map((item) => ({
 ```
 
 > [!NOTE]
-> For skills Icons you may use Garrux library [https://github.com/Garruxx/ascii-icons](https://github.com/Garruxx/ascii-icons)
+> Untuk icon skill, kamu bisa menggunakan library dari Garrux: [https://github.com/Garruxx/ascii-icons](https://github.com/Garruxx/ascii-icons)
 
-This data is then passed to the portfolio component as props.
+Data ini selanjutnya akan dikirim ke komponen portfolio sebagai props untuk ditampilkan di halaman portfolio.
 
-## Adding Icons with Iconify
+## Menambahkan Icon dengan Iconify
 
-We use Iconify for icons. To add new icons, use the `icon` attribute.
+Project ini menggunakan **Iconify** untuk menampilkan icon. Untuk menambahkan icon baru, gunakan atribut `icon`.
 
-### Example
+### Contoh
 
-To use a React icon:
+Untuk menampilkan icon React:
 
 ```html
 <iconify-icon icon="logos:react" width="27" height="27"></iconify-icon>
 ```
 
-In `data.js`, specify the icon identifier like this:
+Pada file `data.js`, tentukan identifier icon seperti berikut:
 
 ```js
 {
@@ -110,9 +110,9 @@ In `data.js`, specify the icon identifier like this:
 }
 ```
 
-### Adding the Iconify Script
+### Menambahkan Script Iconify
 
-Add the Iconify script to the `<head>` section of your project:
+Tambahkan script Iconify ke dalam bagian `<head>` pada project kamu:
 
 ```html
 <head>
@@ -120,35 +120,33 @@ Add the Iconify script to the `<head>` section of your project:
 </head>
 ```
 
-Once this script is included, you can use any Iconify icon by specifying its identifier.
+Setelah script ini ditambahkan, kamu sudah bisa menggunakan berbagai icon dari Iconify dengan menentukan identifier icon yang sesuai.
 
-## Technologies Used
+## Teknologi yang Digunakan
 
-This template leverages several modern technologies to create a highly responsive and visually appealing portfolio:
+Template portfolio ini menggunakan beberapa teknologi modern untuk menghasilkan tampilan yang responsif, ringan, dan menarik secara visual:
 
-- **Astro**: A modern static site builder that allows you to use your favorite frameworks such as React, Vue, and Svelte. It optimizes for performance by shipping less JavaScript.
-- **React**: A JavaScript library for building user interfaces, which allows for the creation of reusable components.
-- **Tailwind CSS**: A utility-first CSS framework that enables you to design directly in your markup, providing flexibility and control over your styling.
-- **Styled Components**: A library for React and React Native that allows you to use component-level styles in your application. It utilizes tagged template literals to style components.
-- **Iconify**: A comprehensive library for icons that provides access to thousands of icons from different collections, all accessible via a single syntax.
+- **Astro**: Static site builder modern yang memungkinkan penggunaan berbagai framework seperti React, Vue, dan Svelte, serta dioptimalkan untuk performa dengan JavaScript yang minimal.
+- **React**: Library JavaScript untuk membangun antarmuka pengguna berbasis komponen yang dapat digunakan kembali.
+- **Tailwind CSS**: Framework CSS berbasis utility yang memungkinkan styling langsung di dalam markup dengan fleksibilitas dan kontrol penuh.
+- **Styled Components**: Library untuk React yang memungkinkan penggunaan styling pada level komponen menggunakan tagged template literals.
+- **Iconify**: Library icon lengkap yang menyediakan ribuan icon dari berbagai koleksi dengan satu format penulisan yang konsisten.
 
-## Figma Design
+## Desain Figma
 
-You can view and edit the design of this template on Figma. Here is the [Figma design link](https://www.figma.com/design/15EteAKw8d0QCNCucw5lft/mi-primer-blog?node-id=200-643&t=hbUqn1hqSfLcfI92-0).
+Kamu dapat melihat dan mengedit desain template ini melalui Figma. Berikut adalah tautan desain Figma yang digunakan:
 
-## Author and License
+[Link Desain Figma](https://www.figma.com/design/15EteAKw8d0QCNCucw5lft/mi-primer-blog?node-id=200-643&t=hbUqn1hqSfLcfI92-0)
 
-- **Author**: SofiDev / Garrux
-- **License**: MIT
+## Bug dan Permasalahan
 
-## Bugs and Issues
+Jika kamu menemukan bug atau mengalami kendala saat menggunakan project ini, silakan laporkan melalui halaman Issues pada repository GitHub project ini.
 
-If you encounter any bugs or have issues, please report them [here](https://github.com/SofiDevO/portfolio-astrosofidev-garrux/issues).
+## Halaman Utama
 
-## Homepage
-
-For more information and detailed documentation, visit the [homepage](https://github.com/SofiDevO/portfolio-astrosofidev-garrux#readme).
+Untuk informasi lebih lengkap dan dokumentasi tambahan, silakan kunjungi halaman utama repository ini di GitHub.
 
 ---
 
-Enjoy building your portfolio! If you have any questions or run into any issues, feel free to reach out.
+Selamat menggunakan dan mengembangkan portfolio ini!  
+Jika ada pertanyaan atau ingin berdiskusi lebih lanjut, jangan ragu untuk menghubungi saya.

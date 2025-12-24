@@ -11,10 +11,11 @@ import Footer from "../components/Footer/Footer.astro";
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="../../img/jhon-doe.webp" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -27,7 +28,7 @@ import Footer from "../components/Footer/Footer.astro";
     <title> {title}</title>
   </head>
   <body>
-    <Header  origin={menuBlog} name="Jhon Doe"/>
+    <Header  origin={menuBlog} name="Canks"/>
     <main class="w-full flex flex-col justify-center  items-center pt-[13rem]" >
       <div class="text-center" >
         <h1 class="text-4xl text-center font-extrabold color__gradiente mb-3" >{title}</h1>

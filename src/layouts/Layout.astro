@@ -4,17 +4,17 @@ interface Props {
 	title: string;
 }
 const { title } = Astro.props;
-import Header from '../components/header/Header.astro';
-import { mainMenu } from '../components/data/menuData.js';
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="id">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
+		<meta name="title" content={title} />
+		<meta name="site_name" content="Canks Full Stack Developer" />
+		<meta name="description" content="Saya pengembang web sejak 2020, dengan minat besar terhadap teknologi. Saya terus belajar dan mengikuti perkembangan terbaru untuk memahami cara perusahaan teknologi terkemuka menciptakan sistem yang andal" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -34,18 +34,26 @@ const {
 					))
 				}
 			</div>
-
 			<div class="buttons">
-				<a href={repoURL}>
+				{repoURL != '' && (
+					<a href={repoURL}>
+						<span>
+							Github
+							{(<iconify-icon icon="quill:link-out" />)}
+						</span>
+					</a>
+				)}
+				{demoURL != '' &&(
+					<a href={demoURL}>
+						<span>
+							Demo
+							{(<iconify-icon icon="quill:link-out" />)}
+						</span>
+					</a>
+				)}
+				<a href="#portafolio">
 					<span>
-						Github
-						{(<iconify-icon icon="quill:link-out" />)}
-					</span>
-				</a>
-
-				<a href={demoURL}>
-					<span>
-						Demo
+						See More
 						{(<iconify-icon icon="quill:link-out" />)}
 					</span>
 				</a>

@@ -1,0 +1,83 @@
+---
+interface Props {
+	class?: string;
+}
+import { SITE } from './data/site.js';
+
+const { class: className = '' } = Astro.props;
+
+const links = SITE.socials;
+---
+
+<ul class:list={['social', className]}>
+	{
+		links.map((l) => (
+			<li>
+				<a class="social__link" href={l.href} target="_blank" rel="noopener noreferrer" data-magnetic>
+					<span>{l.label}</span>
+					<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+						<path d="M3 13 13 3M5 3h8v8" fill="none" stroke="currentColor" stroke-width="1.5" />
+					</svg>
+				</a>
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	.social {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.social__link {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding-block: 0.25rem;
+		font: 450 var(--fs-mono) / 1.4 var(--font-mono);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.social__link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 1px;
+		background: currentColor;
+		transform-origin: right;
+		transition: transform 0.6s var(--ease-out);
+	}
+	.social__link:hover::after {
+		animation: social-line 0.8s var(--ease-out);
+	}
+	.social__link svg {
+		transition: transform 0.5s var(--ease-out);
+	}
+	.social__link:hover svg {
+		transform: translate(2px, -2px);
+	}
+	@keyframes social-line {
+		0% {
+			transform: scaleX(1);
+			transform-origin: right;
+		}
+		45% {
+			transform: scaleX(0);
+			transform-origin: right;
+		}
+		46% {
+			transform-origin: left;
+		}
+		100% {
+			transform: scaleX(1);
+			transform-origin: left;
+		}
+	}
+</style>

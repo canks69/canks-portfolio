@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import Button from '../Button.astro';
+import BlogRow from '../BlogRow.astro';
+import Rule from '../Rule.astro';
+import SectionHead from '../SectionHead.astro';
+
+const posts = (await getCollection('blog'))
+	.filter((post) => post.id !== 'example')
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+{
+	posts.length > 0 && (
+		<section id="blog" class="journal">
+			<Rule />
+			<div class="wrap journal__inner">
+				<SectionHead no="04" label="Blog" />
+				<div class="journal__top">
+					<h2 class="display" data-split>
+						Blog <span class="serif">Saya</span>
+					</h2>
+					<div data-reveal>
+						<Button href="/blog" variant="ghost">
+							Lihat lebih banyak
+						</Button>
+					</div>
+				</div>
+				<ul class="journal__list" data-reveal-group>
+					{posts.slice(0, 3).map((post, i) => (
+						<BlogRow
+							index={i}
+							title={post.data.title}
+							description={post.data.description}
+							date={post.data.pubDate}
+							href={`/blog/${post.id}/`}
+						/>
+					))}
+				</ul>
+			</div>
+		</section>
+	)
+}
+
+<style>
+	.journal__inner {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(2.5rem, 6vw, 4.5rem);
+		padding-block: 1.5rem clamp(5rem, 12vw, 9rem);
+	}
+	.journal__top {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 2rem;
+	}
+	.journal__top h2 {
+		margin: 0;
+	}
+	.journal__top h2 :global(.serif) {
+		color: var(--accent);
+	}
+	.journal__list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--line-strong);
+	}
+</style>

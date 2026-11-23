@@ -1,0 +1,68 @@
+---
+/**
+ * Kepala halaman untuk halaman dalam (blog, proyek, keterampilan, kontak).
+ * <h1> memakai [data-title] sehingga kata-katanya naik dari mask saat intro.
+ * Slot `lead` opsional untuk paragraf pengantar.
+ */
+interface Props {
+	eyebrow: string;
+	back?: { href: string; label: string };
+	size?: 'display' | 'post';
+}
+const { eyebrow, back, size = 'display' } = Astro.props;
+const hasLead = Astro.slots.has('lead');
+---
+
+<header class="wrap page-head">
+	{
+		back ? (
+			<a class="mono page-head__back" href={back.href} data-intro data-page-meta>
+				← {back.label}
+			</a>
+		) : (
+			<p class="mono" data-intro data-page-meta>
+				{eyebrow}
+			</p>
+		)
+	}
+	<h1 class:list={['page-head__title', size === 'display' ? 'display' : 'post']} data-title>
+		<slot />
+	</h1>
+	{
+		hasLead && (
+			<p class="lead page-head__lead" data-intro data-page-meta>
+				<slot name="lead" />
+			</p>
+		)
+	}
+</header>
+
+<style>
+	.page-head {
+		display: flex;
+		flex-direction: column;
+		gap: 1.75rem;
+		padding-block: calc(var(--header-h) + clamp(3rem, 8vw, 7rem)) clamp(2rem, 5vw, 4rem);
+	}
+	.page-head__back:hover {
+		color: var(--accent);
+	}
+	.page-head__title.display {
+		font-size: clamp(2.5rem, 12vw, 12rem);
+	}
+	.page-head__title.post {
+		max-width: 16ch;
+		font-size: clamp(2.75rem, 1.2rem + 6.5vw, 8rem);
+		font-weight: 560;
+		line-height: 0.95;
+		letter-spacing: -0.055em;
+		text-wrap: balance;
+	}
+	.page-head__title :global(.serif) {
+		color: var(--accent);
+	}
+	.page-head__lead {
+		max-width: 30em;
+		color: var(--fg-dim);
+	}
+</style>

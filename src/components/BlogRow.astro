@@ -1,0 +1,105 @@
+---
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+	title: string;
+	description: string;
+	date: Date;
+	href: string;
+	index: number;
+}
+const { title, description, date, href, index } = Astro.props;
+---
+
+<li class="row" data-row>
+	<a class="row__link" href={href}>
+		<span class="row__fill" aria-hidden="true"></span>
+		<span class="row__no mono">{String(index + 1).padStart(2, '0')}</span>
+		<span class="row__main" data-row-main>
+			<h3 class="row__title">{title}</h3>
+			{description && <p class="row__desc">{description}</p>}
+		</span>
+		<span class="row__date mono"><FormattedDate date={date} /></span>
+		<svg class="row__arrow" viewBox="0 0 16 16" width="28" height="28" aria-hidden="true" data-row-arrow>
+			<path d="M3 13 13 3M5 3h8v8" fill="none" stroke="currentColor" stroke-width="1.2" />
+		</svg>
+	</a>
+</li>
+
+<style>
+	.row {
+		border-bottom: 1px solid var(--line-strong);
+	}
+	.row__link {
+		position: relative;
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		align-items: center;
+		gap: 0.75rem 1.5rem;
+		padding: clamp(1.25rem, 2.5vw, 2rem) 0.5rem;
+		overflow: hidden;
+		isolation: isolate;
+		transition: color 0.4s;
+	}
+	/* kotak lime yang naik dari bawah saat hover — murni CSS agar tetap berfungsi tanpa JS / reduced motion */
+	.row__fill {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--accent-fill);
+		transform-origin: bottom;
+		transform: scaleY(0);
+		transition: transform 0.55s var(--ease-out);
+	}
+	.row__link:hover .row__fill,
+	.row__link:focus-visible .row__fill {
+		transform: scaleY(1);
+	}
+	.row__link:hover,
+	.row__link:focus-visible {
+		color: var(--accent-ink);
+	}
+	.row__link:hover .mono,
+	.row__link:hover .row__desc,
+	.row__link:focus-visible .mono,
+	.row__link:focus-visible .row__desc {
+		color: var(--accent-ink);
+	}
+	.row__main {
+		display: block;
+		min-width: 0;
+	}
+	.row__title {
+		font-size: var(--fs-h3);
+		font-weight: 560;
+		line-height: 1.05;
+		letter-spacing: -0.045em;
+	}
+	.row__desc {
+		margin-top: 0.4rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 0.9375rem;
+		color: var(--fg-dim);
+		transition: color 0.4s;
+	}
+	.row__date {
+		display: none;
+	}
+	.row__arrow {
+		flex: none;
+	}
+
+	@media (min-width: 768px) {
+		.row__link {
+			grid-template-columns: 3rem 1fr auto auto;
+			gap: 1.5rem;
+		}
+		.row__date {
+			display: block;
+			min-width: 7.5rem;
+			text-align: right;
+		}
+	}
+</style>

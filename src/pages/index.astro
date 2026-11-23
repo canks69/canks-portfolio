@@ -1,23 +1,25 @@
 ---
-import About from '../components/About/About.astro';
-import BlogHome from '../components/BlogHome.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
 import { mainMenu } from '../components/data/menuData';
-import Footer from '../components/Footer/Footer.astro';
-import Header from '../components/header/Header.astro';
-import Hero from '../components/hero/Hero.astro';
-import Portfolio from '../components/Portfolio.astro';
-import Skills from '../components/skills/Skills.astro';
+import { FEATURES } from '../components/data/site.js';
+import About from '../components/sections/About.astro';
+import Hero from '../components/sections/Hero.astro';
+import Journal from '../components/sections/Journal.astro';
+import Skills from '../components/sections/Skills.astro';
+import Work from '../components/sections/Work.astro';
 import Layout from '../layouts/Layout.astro';
+import { homeLd } from '../lib/seo';
 ---
 
-<Layout title="Canks | Fullstack Developer">
+<Layout title="Canks | Fullstack Developer" jsonLd={homeLd()}>
 	<Header origin={mainMenu} />
-	<main class="self-center w-full">
+	<main id="main">
 		<Hero />
 		<About />
 		<Skills />
-		<Portfolio />
-		<BlogHome />
+		<Work />
+		{FEATURES.blog && <Journal />}
 	</main>
-	<Footer/>
+	<Footer />
 </Layout>

@@ -1,43 +1,69 @@
 ---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from '../components/FormattedDate.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import PageHead from '../components/PageHead.astro';
+import { menuPage } from '../components/data/menuData';
+import Layout from './Layout.astro';
+import { SITE } from '../components/data/site.js';
+import { blogPostingLd } from '../lib/seo';
 
-import type { CollectionEntry } from "astro:content";
-import FormattedDate from "../components/FormattedDate.astro";
-import Header from "../components/header/Header.astro";
-import {  menuBlog } from "../components/data/menuData";
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
-type Props = CollectionEntry<"blog">["data"];
-import "../styles/global.css"
-import Footer from "../components/Footer/Footer.astro";
+type Props = CollectionEntry<'blog'>['data'];
+const { title, description, pubDate, updatedDate, noindex } = Astro.props;
+const url = new URL(Astro.url.pathname, SITE.url).toString();
 ---
 
-<!doctype html>
-<html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="title" content={title} />
-    <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="../../img/jhon-doe.webp" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+<Layout
+	title={`${title} | Canks`}
+	description={description}
+	type="article"
+	noindex={noindex}
+	jsonLd={blogPostingLd({ title, description, pubDate, updatedDate, url })}
+>
+	<Header origin={menuPage} />
+	<main id="main">
+		<article>
+			<PageHead eyebrow="" back={{ href: '/blog', label: 'Semua tulisan' }} size="post">
+				{title}
+				<Fragment slot="lead">{description}</Fragment>
+			</PageHead>
+			<div class="wrap post-meta mono" data-intro data-page-meta>
+				<FormattedDate date={pubDate} />
+				{
+					updatedDate && (
+						<>
+							<span aria-hidden="true">/</span>
+							<span>
+								Diperbarui <FormattedDate date={updatedDate} />
+							</span>
+						</>
+					)
+				}
+			</div>
 
-    <title> {title}</title>
-  </head>
-  <body>
-    <Header  origin={menuBlog} name="Canks"/>
-    <main class="w-full flex flex-col justify-center  items-center pt-[13rem]" >
-      <div class="text-center" >
-        <h1 class="text-4xl text-center font-extrabold color__gradiente mb-3" >{title}</h1>
-        <FormattedDate date={pubDate} clase="text-white text-2xl  " />
-      </div>
-      <section class="flex flex-col md:max-w-[57%]  max-w-[100%] min-w-[30rem]  px-5 pt-10 pb-[3rem] justify-center w-[80%">
-        <slot />
-      </section>
-    </main>
-    <Footer/>
-  </body>
-</html>
+			<div class="wrap post-body">
+				<div class="prose" data-reveal>
+					<slot />
+				</div>
+			</div>
+		</article>
+	</main>
+	<Footer />
+</Layout>
+
+<style>
+	.post-meta {
+		display: flex;
+		gap: 0.75rem;
+		margin-bottom: 2.5rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--line-strong);
+	}
+	.post-body {
+		padding-bottom: clamp(5rem, 12vw, 9rem);
+	}
+	.prose {
+		max-width: 44rem;
+	}
+</style>

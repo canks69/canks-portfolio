@@ -2,6 +2,7 @@
 title: "JavaScript: Tutorial Menu Hamburger"
 description: "Ini adalah postingan terbaru"
 pubDate: '30 Apr 2024'
+noindex: true
 heroImage: "../img/about-1x1.png"
 ---
 

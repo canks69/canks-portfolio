@@ -1,0 +1,87 @@
+---
+interface Props {
+	href: string;
+	variant?: 'solid' | 'ghost';
+	size?: 'md' | 'sm';
+	external?: boolean;
+	class?: string;
+}
+const { href, variant = 'solid', size = 'md', external = false, class: className = '' } = Astro.props;
+---
+
+<a
+	class:list={['btn', `btn--${variant}`, `btn--${size}`, className]}
+	href={href}
+	data-magnetic
+	{...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+>
+	<span class="btn__fill" aria-hidden="true"></span>
+	<span class="btn__label"><slot /></span>
+	<svg class="btn__arrow" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+		<path d="M3 13 13 3M5 3h8v8" fill="none" stroke="currentColor" stroke-width="1.5" />
+	</svg>
+</a>
+
+<style>
+	.btn {
+		--btn-fg: var(--fg);
+		--btn-bg: transparent;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem 1.5rem;
+		overflow: hidden;
+		border: 1px solid var(--line-strong);
+		color: var(--btn-fg);
+		font: 500 var(--fs-mono) / 1 var(--font-mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		white-space: nowrap;
+		isolation: isolate;
+		transition: color 0.4s var(--ease-out), border-color 0.4s;
+	}
+	.btn--sm {
+		padding: 0.7rem 1rem;
+	}
+	.btn--solid {
+		--btn-bg: var(--accent-fill);
+		--btn-fg: var(--accent-ink);
+		border-color: var(--accent-fill);
+	}
+	.btn__fill {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--btn-bg);
+		transform-origin: bottom;
+	}
+	/* hover: kotak lawan warna naik dari bawah */
+	.btn::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--fg);
+		transform: translateY(101%);
+		transition: transform 0.5s var(--ease-out);
+	}
+	.btn--solid::before {
+		background: var(--fg);
+	}
+	.btn:hover,
+	.btn:focus-visible {
+		color: var(--bg);
+		border-color: var(--fg);
+	}
+	.btn:hover::before,
+	.btn:focus-visible::before {
+		transform: none;
+	}
+	.btn__arrow {
+		transition: transform 0.5s var(--ease-out);
+	}
+	.btn:hover .btn__arrow {
+		transform: translate(2px, -2px);
+	}
+</style>

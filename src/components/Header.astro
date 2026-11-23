@@ -1,0 +1,339 @@
+---
+import Button from './Button.astro';
+
+interface MenuItem {
+	link: string;
+	label: string;
+	id?: string;
+}
+interface Props {
+	origin: MenuItem[];
+}
+const { origin } = Astro.props;
+
+// Menu halaman biasa (bukan anchor / beranda) ditandai aktif bila URL cocok
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (link: string) =>
+	!link.includes('#') && link !== '/' && (path === link || path.startsWith(`${link}/`));
+---
+
+<header class="site-header" data-header>
+	<div class="wrap site-header__bar" data-header-bar>
+		<a class="brand" href="/" aria-label="Canks — beranda">
+			<span class="brand__dot" aria-hidden="true"></span>Canks
+		</a>
+
+		<nav class="nav" aria-label="Utama" data-nav>
+			<ul class="nav__list">
+				{
+					origin.map((item, i) => (
+						<li>
+							<a
+								class="nav__link"
+								href={item.link}
+								data-nav-link
+								data-nav-id={item.id}
+								aria-current={isCurrent(item.link) ? 'page' : undefined}
+								data-current={isCurrent(item.link) ? '' : undefined}
+							>
+								<span class="nav__no">{String(i).padStart(2, '0')}</span>
+								{item.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+			<i class="nav__ink" data-nav-ink aria-hidden="true"></i>
+		</nav>
+
+		<div class="site-header__side">
+			<Button href="/kontak" size="sm" class="site-header__cta">Hubungi</Button>
+			<button class="theme-btn" type="button" data-theme-toggle aria-label="Ganti tema">
+				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" data-theme-icon>
+					<g class="theme-btn__sun" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+						<circle cx="12" cy="12" r="4" />
+						<path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+					</g>
+					<path
+						class="theme-btn__moon"
+						d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linejoin="round"
+					/>
+				</svg>
+			</button>
+			<button
+				class="menu-btn"
+				type="button"
+				aria-expanded="false"
+				aria-controls="menu"
+				data-menu-btn
+			>
+				<span class="menu-btn__label mono" data-menu-label>Menu</span>
+				<span class="menu-btn__icon" aria-hidden="true"><i></i><i></i></span>
+			</button>
+		</div>
+	</div>
+	<i class="site-header__progress" data-progress aria-hidden="true"></i>
+</header>
+
+<div class="menu" id="menu" data-menu hidden>
+	<div class="wrap menu__inner">
+		<ul class="menu__list">
+			{
+				origin.map((item, i) => (
+					<li class="menu__item" data-menu-item>
+						<a class="menu__link" href={item.link} data-menu-link>
+							<span class="mono">{String(i).padStart(2, '0')}</span>
+							<span class="menu__text">{item.label}</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+		<a class="menu__mail mono" href="mailto:official.canks@gmail.com" data-menu-item>official.canks@gmail.com</a>
+	</div>
+</div>
+
+<style>
+	.site-header {
+		position: fixed;
+		inset: 0 0 auto 0;
+		z-index: 50;
+		transition: transform 0.6s var(--ease-out);
+	}
+	.site-header[data-hidden] {
+		transform: translateY(-101%);
+	}
+	/* latar kaca muncul setelah halaman digulir */
+	.site-header::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: var(--header-bg);
+		backdrop-filter: blur(14px) saturate(1.2);
+		-webkit-backdrop-filter: blur(14px) saturate(1.2);
+		border-bottom: 1px solid var(--line);
+		opacity: 0;
+		transition: opacity 0.4s;
+	}
+	.site-header[data-scrolled]::before,
+	.site-header[data-menu-open]::before {
+		opacity: 1;
+	}
+	.site-header__bar {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+		height: var(--header-h);
+	}
+
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-size: 1.375rem;
+		font-weight: 600;
+		letter-spacing: -0.05em;
+	}
+	.brand__dot {
+		width: 0.55rem;
+		height: 0.55rem;
+		background: var(--accent);
+		border-radius: 50%;
+	}
+
+	/* ---- nav desktop ---- */
+	.nav {
+		position: relative;
+		display: none;
+	}
+	.nav__list {
+		display: flex;
+		gap: 1.75rem;
+		margin: 0;
+		padding: 0 0 0.5rem;
+		list-style: none;
+	}
+	.nav__link {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		font-size: 0.9375rem;
+		color: var(--fg-dim);
+		transition: color 0.3s;
+	}
+	.nav__no {
+		font: 450 0.6875rem / 1 var(--font-mono);
+		color: var(--fg-mute);
+		transition: color 0.3s;
+	}
+	.nav__link:hover,
+	.nav__link[data-active],
+	.nav__link[data-current] {
+		color: var(--fg);
+	}
+	.nav__link[data-active] .nav__no,
+	.nav__link[data-current] .nav__no {
+		color: var(--accent);
+	}
+	/* satu garis yang berpindah antar menu (digerakkan Motion) */
+	.nav__ink {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 1px;
+		height: 1px;
+		background: var(--accent);
+		transform-origin: 0 50%;
+		transform: scaleX(0);
+	}
+
+	.site-header__side {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	.site-header :global(.site-header__cta) {
+		display: none;
+	}
+
+	/* ---- tombol tema ---- */
+	.theme-btn {
+		display: inline-grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0;
+		background: transparent;
+		border: 1px solid var(--line-strong);
+		border-radius: 50%;
+		color: var(--fg);
+		cursor: pointer;
+		transition: border-color 0.3s, background 0.3s, color 0.3s;
+	}
+	.theme-btn:hover {
+		background: var(--fg);
+		border-color: var(--fg);
+		color: var(--bg);
+	}
+	/* tampilkan ikon tujuan: tema gelap → matahari, tema terang → bulan */
+	:global(:root[data-theme='light']) .theme-btn__sun,
+	:global(:root:not([data-theme='light'])) .theme-btn__moon {
+		display: none;
+	}
+
+	/* ---- tombol menu (mobile) ---- */
+	.menu-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+		background: none;
+		border: 0;
+		color: var(--fg);
+		cursor: pointer;
+	}
+	.menu-btn__icon {
+		position: relative;
+		width: 1.5rem;
+		height: 0.75rem;
+	}
+	.menu-btn__icon i {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: 1px;
+		background: currentColor;
+		transition: transform 0.5s var(--ease-out), top 0.5s var(--ease-out);
+	}
+	.menu-btn__icon i:first-child {
+		top: 0;
+	}
+	.menu-btn__icon i:last-child {
+		top: calc(100% - 1px);
+	}
+	.menu-btn[aria-expanded='true'] .menu-btn__icon i:first-child {
+		top: 50%;
+		transform: rotate(45deg);
+	}
+	.menu-btn[aria-expanded='true'] .menu-btn__icon i:last-child {
+		top: 50%;
+		transform: rotate(-45deg);
+	}
+
+	/* ---- progress scroll (digerakkan Motion scroll()) ---- */
+	.site-header__progress {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		height: 1px;
+		background: var(--accent);
+		transform-origin: left;
+		transform: scaleX(0);
+		pointer-events: none;
+	}
+
+	/* ---- overlay menu ---- */
+	.menu {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		background: var(--bg);
+		overflow-y: auto;
+	}
+	.menu[hidden] {
+		display: none;
+	}
+	.menu__inner {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		min-height: 100%;
+		padding-top: calc(var(--header-h) + 2rem);
+		padding-bottom: 2rem;
+		gap: 3rem;
+	}
+	.menu__list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--line);
+	}
+	.menu__item {
+		border-bottom: 1px solid var(--line);
+	}
+	.menu__link {
+		display: flex;
+		align-items: baseline;
+		gap: 1.25rem;
+		padding: 1.1rem 0;
+	}
+	.menu__text {
+		font-size: clamp(2.5rem, 11vw, 4.5rem);
+		font-weight: 560;
+		line-height: 1;
+		letter-spacing: -0.055em;
+	}
+	.menu__mail {
+		color: var(--fg);
+	}
+
+	@media (min-width: 1200px) {
+		.nav {
+			display: block;
+		}
+		.site-header :global(.site-header__cta) {
+			display: inline-flex;
+		}
+		.menu-btn,
+		.menu {
+			display: none !important;
+		}
+	}
+</style>

@@ -1,0 +1,247 @@
+---
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import PageHead from '../../components/PageHead.astro';
+import { menuPage } from '../../components/data/menuData';
+import Layout from '../../layouts/Layout.astro';
+
+const EMAIL = 'official.canks@gmail.com';
+
+const channels = [
+	{ label: 'Email', value: EMAIL, href: `mailto:${EMAIL}` },
+	{ label: 'LinkedIn', value: 'Lihat profil', href: 'https://www.linkedin.com/in/muh-ihsan-nur-7b4a79206/' },
+	{ label: 'Instagram', value: '@daeng.kulle_', href: 'https://www.instagram.com/daeng.kulle_/' },
+	{ label: 'GitHub', value: '@canks69', href: 'https://github.com/canks69/' },
+];
+---
+
+<Layout
+	title="Kontak | Canks"
+	description="Ada proyek atau pertanyaan? Hubungi Canks lewat email, LinkedIn, Instagram, atau GitHub."
+>
+	<Header origin={menuPage} />
+	<main id="main">
+		<PageHead eyebrow="(Kontak)">
+			Mari <span class="serif">berbincang.</span>
+			<Fragment slot="lead">
+				Ada proyek, pertanyaan, atau sekadar ingin menyapa? Pilih jalur yang paling nyaman, atau tulis pesan di bawah.
+			</Fragment>
+		</PageHead>
+
+		<section class="wrap contact">
+			<ul class="contact__channels" data-reveal-group>
+				{
+					channels.map((c) => {
+						const external = !c.href.startsWith('mailto:');
+						return (
+							<li>
+								<a
+									class="channel"
+									href={c.href}
+									data-row
+									{...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+								>
+									<span class="channel__fill" aria-hidden="true" />
+									<span class="mono">{c.label}</span>
+									<span class="channel__value" data-row-main>
+										{c.value}
+									</span>
+									<svg class="channel__arrow" viewBox="0 0 16 16" width="24" height="24" aria-hidden="true" data-row-arrow>
+										<path d="M3 13 13 3M5 3h8v8" fill="none" stroke="currentColor" stroke-width="1.2" />
+									</svg>
+								</a>
+							</li>
+						);
+					})
+				}
+			</ul>
+
+			<form class="compose" data-compose data-to={EMAIL} data-reveal>
+				<h2 class="mono compose__title">Tulis pesan</h2>
+
+				<label class="field">
+					<span class="mono">Nama</span>
+					<input name="nama" type="text" autocomplete="name" required />
+				</label>
+				<label class="field">
+					<span class="mono">Email Anda</span>
+					<input name="email" type="email" autocomplete="email" required />
+				</label>
+				<label class="field">
+					<span class="mono">Pesan</span>
+					<textarea name="pesan" rows="5" required></textarea>
+				</label>
+
+				<button class="compose__submit" type="submit" data-magnetic>
+					<span>Kirim lewat email</span>
+					<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+						<path d="M3 13 13 3M5 3h8v8" fill="none" stroke="currentColor" stroke-width="1.5" />
+					</svg>
+				</button>
+				<p class="compose__note mono" aria-live="polite" data-note>
+					Situs ini statis, jadi tombol di atas membuka aplikasi email Anda dengan pesan yang sudah terisi.
+				</p>
+			</form>
+		</section>
+	</main>
+	<Footer />
+</Layout>
+
+<style>
+	.contact {
+		display: grid;
+		gap: clamp(3rem, 7vw, 5rem);
+		padding-bottom: clamp(5rem, 12vw, 9rem);
+	}
+	.contact__channels {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--line-strong);
+	}
+	.contact__channels li {
+		border-bottom: 1px solid var(--line-strong);
+	}
+	.channel {
+		position: relative;
+		display: grid;
+		grid-template-columns: 1fr auto;
+		align-items: center;
+		gap: 0.4rem 1.5rem;
+		padding: 1.5rem 0.5rem;
+		overflow: hidden;
+		isolation: isolate;
+		transition: color 0.4s;
+	}
+	.channel .mono {
+		grid-column: 1 / -1;
+		transition: color 0.4s;
+	}
+	.channel__value {
+		font-size: var(--fs-h3);
+		font-weight: 560;
+		line-height: 1.05;
+		letter-spacing: -0.045em;
+		overflow-wrap: anywhere;
+	}
+	.channel__arrow {
+		grid-column: 2;
+		grid-row: 2;
+	}
+	.channel__fill {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--accent-fill);
+		transform-origin: bottom;
+		transform: scaleY(0);
+		transition: transform 0.55s var(--ease-out);
+	}
+	.channel:hover,
+	.channel:focus-visible {
+		color: var(--accent-ink);
+	}
+	.channel:hover .mono,
+	.channel:focus-visible .mono {
+		color: var(--accent-ink);
+	}
+	.channel:hover .channel__fill,
+	.channel:focus-visible .channel__fill {
+		transform: scaleY(1);
+	}
+
+	/* ---- form ---- */
+	.compose {
+		display: grid;
+		gap: 1.5rem;
+		align-content: start;
+	}
+	.compose__title {
+		margin: 0;
+		color: var(--fg);
+	}
+	.field {
+		display: grid;
+		gap: 0.5rem;
+	}
+	.field input,
+	.field textarea {
+		width: 100%;
+		padding: 0.75rem 0;
+		background: transparent;
+		border: 0;
+		border-bottom: 1px solid var(--line-strong);
+		border-radius: 0;
+		color: var(--fg);
+		font: inherit;
+		font-size: 1.25rem;
+		letter-spacing: -0.02em;
+		resize: vertical;
+		transition: border-color 0.3s;
+	}
+	.field input:focus,
+	.field textarea:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+	.field:focus-within .mono {
+		color: var(--accent);
+	}
+	.compose__submit {
+		display: inline-flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1.1rem 1.5rem;
+		background: var(--accent-fill);
+		border: 0;
+		color: var(--accent-ink);
+		font: 500 var(--fs-mono) / 1 var(--font-mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: background 0.3s;
+	}
+	.compose__submit:hover {
+		background: var(--fg);
+	}
+	.compose__note {
+		margin: 0;
+		text-transform: none;
+		letter-spacing: 0.02em;
+		color: var(--fg-mute);
+	}
+
+	@media (min-width: 900px) {
+		.contact {
+			grid-template-columns: 7fr 5fr;
+			gap: 5rem;
+			align-items: start;
+		}
+	}
+</style>
+
+<script>
+	import { animate } from 'motion';
+
+	const form = document.querySelector<HTMLFormElement>('[data-compose]');
+	const note = document.querySelector<HTMLElement>('[data-note]');
+
+	form?.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const data = new FormData(form);
+		const nama = String(data.get('nama') ?? '').trim();
+		const email = String(data.get('email') ?? '').trim();
+		const pesan = String(data.get('pesan') ?? '').trim();
+
+		const subject = `Pesan dari ${nama}`;
+		const body = `${pesan}\n\n—\n${nama}\n${email}`;
+		const to = form.dataset.to ?? '';
+		window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+		if (note) {
+			note.textContent = 'Membuka aplikasi email Anda… Bila tidak terbuka, kirim langsung ke alamat email di atas.';
+			animate(note, { opacity: [0, 1], y: [8, 0] }, { duration: 0.6 });
+		}
+	});
+</script>

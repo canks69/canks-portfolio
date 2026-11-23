@@ -1,0 +1,200 @@
+---
+import Button from '../Button.astro';
+import ProjectCard from '../ProjectCard.astro';
+import Rule from '../Rule.astro';
+import SectionHead from '../SectionHead.astro';
+import { getProjects } from '../../lib/projects';
+
+const projects = await getProjects();
+const total = String(projects.length).padStart(2, '0');
+---
+
+<section id="portofolio" class="work" data-work>
+	<Rule />
+	<div class="work__pin" data-work-pin>
+		<div class="work__stage">
+			<ol class="work__track" data-work-track>
+				<li class="work__intro" data-work-intro>
+					<SectionHead no="03" label="Portofolio" />
+					<h2 class="display" data-split>Portofolio</h2>
+					<p class="mono work__count">({total}) proyek <span class="work__hint">— gulir →</span></p>
+				</li>
+
+				{
+					projects.map((p, i) => (
+						<li class="card" data-work-card>
+							<ProjectCard project={p} index={i} />
+						</li>
+					))
+				}
+
+				<li class="work__end" data-work-end>
+					<p class="mono">Selesai — {total} / {total}</p>
+					<Button href="/proyek/">Semua proyek</Button>
+				</li>
+			</ol>
+		</div>
+
+		<div class="wrap work__progress" data-work-progress>
+			<span class="mono" data-work-current>01</span>
+			<i class="work__bar" aria-hidden="true"><b data-work-fill></b></i>
+			<span class="mono">{total}</span>
+		</div>
+	</div>
+</section>
+
+<style>
+	.work__pin {
+		position: relative;
+	}
+
+	/* ---- layout bawaan: daftar vertikal (mobile / tanpa JS / reduced motion) ---- */
+	.work__stage {
+		padding-block: 1.5rem clamp(3rem, 8vw, 6rem);
+	}
+	.work__track {
+		display: grid;
+		gap: clamp(2.5rem, 5vw, 4rem) 2rem;
+		grid-template-columns: 1fr;
+		max-width: var(--frame);
+		margin: 0 auto;
+		padding: 0 var(--edge);
+		list-style: none;
+	}
+	.work__intro {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(2rem, 5vw, 3.5rem);
+		margin-bottom: 1rem;
+	}
+	.work__intro h2 {
+		margin: 0;
+	}
+	.work__count {
+		color: var(--fg-dim);
+	}
+	.work__hint {
+		display: none;
+	}
+	.work__end {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 1.25rem;
+	}
+	.work__progress {
+		display: none;
+	}
+	.card {
+		display: flex;
+	}
+
+	@media (min-width: 640px) and (max-width: 1023px) {
+		.work__track {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		.work__intro,
+		.work__end {
+			grid-column: 1 / -1;
+		}
+	}
+	@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+		.work__track {
+			grid-template-columns: repeat(3, 1fr);
+		}
+		.work__intro,
+		.work__end {
+			grid-column: 1 / -1;
+		}
+	}
+
+	/* ---- mode pinned horizontal (kelas dipasang oleh scripts/work.ts) ----
+	   Elemen kartu berada di komponen anak (ProjectCard), jadi selektornya ditulis :global(...) utuh
+	   dan sengaja lebih spesifik daripada style ber-scope milik kartu. */
+	:global(.work--pinned) .work__pin {
+		height: 100svh;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+	:global(.work--pinned) .work__stage {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		padding-block: calc(var(--header-h) + 1rem) 1rem;
+		min-height: 0;
+	}
+	:global(.work--pinned) .work__track {
+		display: flex;
+		align-items: stretch;
+		gap: clamp(1.5rem, 2.5vw, 2.5rem);
+		width: max-content;
+		max-width: none;
+		margin: 0;
+		/* panel pertama sejajar dengan konten .wrap */
+		padding-left: max(var(--edge), calc((100vw - var(--frame)) / 2 + var(--edge)));
+		padding-right: var(--edge);
+		will-change: transform;
+	}
+	:global(.work--pinned) .work__intro {
+		flex: none;
+		justify-content: space-between;
+		width: clamp(22rem, 38vw, 40rem);
+		margin: 0;
+		padding-right: 2rem;
+	}
+	:global(.work--pinned) .work__intro h2 {
+		font-size: clamp(3rem, 1rem + 5vw, 7.5rem);
+	}
+	:global(.work--pinned) .work__hint {
+		display: inline;
+		color: var(--accent);
+	}
+	:global(.work--pinned) .card {
+		flex: none;
+		width: clamp(22rem, 30vw, 32rem);
+		max-height: calc(100svh - var(--header-h) - 7rem);
+	}
+	:global(.work--pinned .work__track .card .card__inner) {
+		min-height: 0;
+	}
+	:global(.work--pinned .work__track .card .card__media) {
+		flex: none;
+		aspect-ratio: 16 / 9.5;
+	}
+	/* gambar sedikit lebih lebar dari bingkai agar bisa bergeser (parallax) */
+	:global(.work--pinned .work__track .card .card__media img) {
+		width: 118%;
+		max-width: none;
+		margin-left: -9%;
+	}
+	:global(.work--pinned .work__track .card .card__desc) {
+		-webkit-line-clamp: 4;
+	}
+	:global(.work--pinned) .work__end {
+		flex: none;
+		justify-content: center;
+		width: clamp(16rem, 22vw, 22rem);
+		padding-inline: 1rem 2rem;
+	}
+
+	:global(.work--pinned) .work__progress {
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+		padding-block: 0 2rem;
+	}
+	.work__bar {
+		position: relative;
+		flex: 1;
+		height: 1px;
+		background: var(--line-strong);
+	}
+	.work__bar b {
+		position: absolute;
+		inset: 0;
+		background: var(--accent);
+		transform-origin: left;
+		transform: scaleX(0);
+	}
+</style>

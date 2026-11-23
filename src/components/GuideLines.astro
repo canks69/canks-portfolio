@@ -1,0 +1,65 @@
+---
+/**
+ * Garis pemandu vertikal tetap di belakang seluruh halaman.
+ * Digambar saat intro (GSAP) — lihat scripts/intro.ts.
+ */
+---
+
+<div class="guides" aria-hidden="true">
+	<div class="frame">
+		<i data-guide></i>
+		<i data-guide></i>
+		<i data-guide></i>
+		<i data-guide></i>
+	</div>
+</div>
+
+<style is:global>
+	/* .frame dipakai bersama oleh guides & tanda silang pada Rule */
+	.frame {
+		position: relative;
+		width: 100%;
+		max-width: var(--frame);
+		height: 100%;
+		margin-inline: auto;
+	}
+	.frame > i,
+	.frame > b {
+		position: absolute;
+		top: 0;
+	}
+	.frame > :nth-child(1) {
+		left: var(--gutter);
+	}
+	.frame > :nth-child(2) {
+		left: calc(var(--gutter) + (100% - 2 * var(--gutter)) / 3);
+	}
+	.frame > :nth-child(3) {
+		left: calc(var(--gutter) + (100% - 2 * var(--gutter)) * 2 / 3);
+	}
+	.frame > :nth-child(4) {
+		right: var(--gutter);
+	}
+	@media (max-width: 767px) {
+		.frame > :nth-child(2),
+		.frame > :nth-child(3) {
+			display: none;
+		}
+	}
+
+	.guides {
+		position: fixed;
+		inset: 0;
+		z-index: 0;
+		pointer-events: none;
+	}
+	.guides i {
+		width: 1px;
+		height: 100%;
+		background: var(--line);
+		transform-origin: top;
+	}
+	.js .guides i {
+		transform: scaleY(0);
+	}
+</style>

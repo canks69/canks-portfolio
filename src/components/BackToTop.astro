@@ -1,0 +1,69 @@
+---
+/**
+ * Popup "kembali ke atas": tombol melayang yang muncul (pop) setelah halaman digulir
+ * dan menampilkan progres baca sebagai cincin. Digerakkan oleh scripts/backToTop.ts.
+ */
+---
+
+<button class="to-top" type="button" aria-label="Kembali ke atas" data-to-top hidden>
+	<svg class="to-top__ring" viewBox="0 0 48 48" aria-hidden="true">
+		<circle class="to-top__track" cx="24" cy="24" r="22"></circle>
+		<circle class="to-top__bar" cx="24" cy="24" r="22" data-to-top-ring></circle>
+	</svg>
+	<svg class="to-top__arrow" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" data-to-top-arrow>
+		<path d="M8 13.5v-11M3.5 7 8 2.5 12.5 7" fill="none" stroke="currentColor" stroke-width="1.5" />
+	</svg>
+</button>
+
+<style>
+	.to-top {
+		position: fixed;
+		right: max(1rem, var(--gutter));
+		bottom: max(1rem, env(safe-area-inset-bottom));
+		z-index: 60;
+		display: grid;
+		place-items: center;
+		width: 3.25rem;
+		height: 3.25rem;
+		padding: 0;
+		background: var(--bg);
+		border: 0;
+		border-radius: 50%;
+		color: var(--fg);
+		cursor: pointer;
+		box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.28);
+		transition: background 0.3s, color 0.3s;
+	}
+	.to-top[hidden] {
+		display: none;
+	}
+	.to-top:hover {
+		background: var(--accent-fill);
+		color: var(--accent-ink);
+	}
+	.to-top__ring {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		transform: rotate(-90deg);
+	}
+	.to-top__ring circle {
+		fill: none;
+		stroke-width: 2;
+	}
+	.to-top__track {
+		stroke: var(--line-strong);
+	}
+	.to-top__bar {
+		stroke: var(--accent);
+		stroke-linecap: round;
+		transition: stroke 0.3s;
+	}
+	.to-top:hover .to-top__bar {
+		stroke: var(--accent-ink);
+	}
+	.to-top__arrow {
+		position: relative;
+	}
+</style>

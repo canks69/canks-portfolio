@@ -1,0 +1,242 @@
+---
+import Button from '../Button.astro';
+import Rule from '../Rule.astro';
+import SectionHead from '../SectionHead.astro';
+import { skillGroups, techIcons } from '../data/skillsData.js';
+
+// baris kedua dibalik supaya dua marquee tidak berurutan sama
+const rows = [
+	{ dir: 1, items: techIcons },
+	{ dir: -1, items: [...techIcons].reverse() },
+];
+---
+
+<section id="skills" class="skills" data-skills>
+	<Rule />
+	<div class="wrap skills__inner">
+		<SectionHead no="02" label="Keterampilan" />
+
+		<div class="skills__top">
+			<h2 class="display" data-split>Keterampilan</h2>
+			<div class="skills__copy" data-reveal>
+				<p class="mono skills__prompt">$ ls /skills</p>
+				<p>
+					Berpengalaman sebagai Full Stack Developer dalam membangun aplikasi web dari perancangan hingga
+					deployment. Menguasai backend dengan Laravel, NestJS, ExpressJS, Bun, dan Gofiber, serta frontend
+					React, NextJS, Angular, dan VueJS. Terbiasa mengelola MySQL, PostgreSQL, MongoDB, dan Redis,
+					berpengalaman mengembangkan sistem ERP dan aplikasi enterprise, serta mendukung proses DevOps dengan
+					Docker, Git, Jenkins, dan Nginx.
+				</p>
+				<div class="skills__more">
+					<Button href="/keterampilan/" variant="ghost" size="sm">Detail & proyek terkait</Button>
+				</div>
+			</div>
+		</div>
+
+		<div class="skills__groups" data-reveal-group>
+			{
+				skillGroups.map((g, i) => (
+					<div class="skills__group" data-reveal-item>
+						<h3 class="mono">
+							<span>{String(i + 1).padStart(2, '0')}</span>
+							{g.title}
+						</h3>
+						<ul>
+							{g.items.map((item) => (
+								<li data-skill>
+									<span>{item}</span>
+									<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+										<path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.4" />
+									</svg>
+								</li>
+							))}
+						</ul>
+					</div>
+				))
+			}
+		</div>
+	</div>
+
+	<div class="skills__tape" aria-label="Teknologi yang saya gunakan">
+		{
+			rows.map((row, r) => (
+				<div class="marquee" data-marquee data-dir={row.dir} role={r === 0 ? 'list' : undefined} aria-hidden={r === 0 ? undefined : 'true'}>
+					{[0, 1].map((copy) => (
+						<div class="marquee__group" aria-hidden={copy === 1 ? 'true' : undefined}>
+							{row.items.map((t) => (
+								<div class="tech" style={`--c:${t.color}`} role={r === 0 && copy === 0 ? 'listitem' : undefined}>
+									<span class="tech__icon" style={`--svg:url(${t.src})`} aria-hidden="true" />
+									<span class="tech__name">{t.name}</span>
+								</div>
+							))}
+						</div>
+					))}
+				</div>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.skills__inner {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(2.5rem, 6vw, 5rem);
+		padding-block: 1.5rem clamp(4rem, 9vw, 7rem);
+	}
+	.skills__top {
+		display: grid;
+		gap: 2rem;
+	}
+	.skills__top h2 {
+		margin: 0;
+		font-size: clamp(3rem, 1rem + 6.2vw, 7.5rem);
+	}
+	.skills__copy {
+		margin-left: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		max-width: 38rem;
+	}
+	.skills__copy p:not(.mono) {
+		color: var(--fg-dim);
+	}
+	.skills__prompt {
+		color: var(--accent);
+	}
+
+	.skills__more {
+		margin-top: 0.75rem;
+	}
+
+	/* ---- kolom kelompok ----
+	   Garis kiri tiap sel tepat jatuh di garis pemandu (margin negatif = --pad). */
+	.skills__groups {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+		margin-inline: calc(var(--pad) * -1);
+		border-top: 1px solid var(--line-strong);
+		border-right: 1px solid var(--line);
+	}
+	.skills__group {
+		padding: 1.5rem var(--pad) 2rem;
+		border-left: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
+	}
+	.skills__group h3 {
+		display: flex;
+		gap: 0.75rem;
+		margin: 0 0 1.25rem;
+		color: var(--fg);
+	}
+	.skills__group h3 span {
+		color: var(--fg-mute);
+	}
+	.skills__group ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.skills__group li {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.7rem 0;
+		border-top: 1px solid var(--line);
+		font-size: 1.125rem;
+		font-weight: 450;
+		letter-spacing: -0.02em;
+		color: var(--fg-dim);
+		cursor: default;
+		transition: color 0.3s;
+	}
+	.skills__group li:hover {
+		color: var(--fg);
+	}
+	.skills__group li svg {
+		color: var(--accent);
+		opacity: 0;
+		transform: translateX(-8px);
+		transition: opacity 0.3s, transform 0.5s var(--ease-out);
+	}
+	.skills__group li:hover svg {
+		opacity: 1;
+		transform: none;
+	}
+
+	/* ---- marquee ---- */
+	.skills__tape {
+		border-block: 1px solid var(--line-strong);
+		background: var(--bg);
+	}
+	.marquee {
+		display: flex;
+		overflow: hidden;
+		user-select: none;
+	}
+	.marquee + .marquee {
+		border-top: 1px solid var(--line);
+	}
+	.marquee__group {
+		display: flex;
+		flex: none;
+		min-width: 100%;
+	}
+	.tech {
+		display: flex;
+		flex: none;
+		align-items: center;
+		gap: 1.1rem;
+		padding: 1.25rem clamp(1.75rem, 3.5vw, 3rem);
+		border-right: 1px solid var(--line);
+		color: var(--fg-dim);
+		transition: color 0.4s;
+	}
+	.tech__icon {
+		display: block;
+		width: clamp(3.25rem, 5vw, 4.5rem);
+		height: clamp(3.25rem, 5vw, 4.5rem);
+		background: currentColor;
+		-webkit-mask: var(--svg) center / contain no-repeat;
+		mask: var(--svg) center / contain no-repeat;
+		transition: background 0.4s;
+	}
+	.tech__name {
+		font-size: clamp(1.375rem, 1rem + 1.2vw, 2rem);
+		font-weight: 520;
+		letter-spacing: -0.04em;
+		white-space: nowrap;
+	}
+	.tech:hover {
+		color: var(--fg);
+	}
+	.tech:hover .tech__icon {
+		background: var(--c);
+	}
+
+	/* tanpa animasi: marquee jadi grid biasa */
+	@media (prefers-reduced-motion: reduce) {
+		.marquee {
+			overflow: visible;
+		}
+		.marquee__group {
+			flex-wrap: wrap;
+		}
+		.marquee__group[aria-hidden='true'] {
+			display: none;
+		}
+	}
+
+	/* judul & paragraf sebaris bila cukup lebar */
+	@media (min-width: 1100px) {
+		.skills__top {
+			grid-template-columns: auto minmax(0, 34rem);
+			justify-content: space-between;
+			align-items: end;
+		}
+		.skills__copy {
+			margin-left: 0;
+		}
+	}
+</style>

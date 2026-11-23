@@ -9,128 +9,114 @@ Di repository ini, kamu bisa menemukan informasi mengenai struktur project, cara
 ## Daftar Isi
 
 1. [Cara Penggunaan](#cara-penggunaan)
-2. [Format Data Portfolio](#format-data-portfolio)
-3. [Menambahkan Icon dengan Iconify](#menambahkan-icon-dengan-iconify)
-4. [Teknologi yang Digunakan](#teknologi-yang-digunakan)
-5. [Desain Figma](#desain-figma)
-6. [Bug dan Permasalahan](#bug-dan-permasalahan)
-7. [Halaman Utama](#halaman-utama)
+2. [Halaman](#halaman)
+3. [Menambah proyek (Markdown)](#menambah-proyek-markdown)
+4. [Tema](#tema)
+5. [Sistem Animasi](#sistem-animasi)
+6. [Teknologi yang Digunakan](#teknologi-yang-digunakan)
+7. [Desain Figma](#desain-figma)
+8. [Bug dan Permasalahan](#bug-dan-permasalahan)
+9. [Halaman Utama](#halaman-utama)
 
 ## Cara Penggunaan
 
-Untuk menambahkan proyek baru ke dalam portfolio, silakan tambahkan data proyek pada file `/src/data/portfolioData.js`.
+Project ini memakai [Bun](https://bun.sh) sebagai package manager dan runtime (lockfile: `bun.lock`).
 
-## Format Data Portfolio
+```bash
+bun install
+bun --bun run dev      # http://localhost:4321
+bun --bun run build    # hasil build ada di /dist
+bun --bun run preview  # mencoba hasil build
+```
 
-Data portfolio harus mengikuti format berikut:
+> `--bun` membuat skrip Astro berjalan di runtime Bun (tanpa Node.js), sama seperti saat build di Docker. Tanpa flag ini Bun tetap memakai Node.js bila terpasang (Astro 7 membutuhkan Node.js >= 22.23.4).
+
+Untuk menambahkan proyek baru, buat file Markdown di `src/content/projects/` (lihat [Menambah proyek](#menambah-proyek-markdown)). Daftar keterampilan ada di `src/components/data/skillsData.js`, artikel blog di `src/content/blog/`.
+
+## Halaman
+
+| URL | Isi | Sumber data |
+| --- | --- | --- |
+| `/` | Beranda: hero, tentang, keterampilan, galeri portofolio (+ blog bila aktif) | semua sumber di bawah |
+| `/proyek/` | Semua proyek + penyaring berdasarkan teknologi | `src/content/projects/*.md` |
+| `/proyek/<slug>/` | Detail satu proyek (deskripsi lengkap dari isi file Markdown) | `src/content/projects/<slug>.md` |
+| `/keterampilan/` | Teknologi per kelompok, tertaut ke proyek yang memakainya | `skillsData.js` + proyek |
+| `/kontak/` | Saluran kontak + form yang membuka aplikasi email (situs statis, tanpa backend) | `src/pages/kontak/index.astro` |
+| `/blog/`, `/blog/<id>/` | Daftar & artikel — **sedang disembunyikan** (lihat di bawah) | `src/content/blog/*.md` |
+
+Menu ada di `src/components/data/menuData.js` (`mainMenu` untuk beranda, `menuPage` untuk halaman lain; menu aktif ditentukan dari URL).
+
+## Menyembunyikan / menampilkan blog
+
+Blog dikendalikan satu saklar di `src/components/data/site.js`:
 
 ```js
-/**
- * @typedef PortfolioData
- * @property {string} imgSrc - URL atau path gambar proyek
- * @property {string} title - Judul card / nama proyek
- * @property {string[]} skills - Daftar teknologi yang digunakan, contoh: ['React', 'CSS', 'JavaScript']
- * @property {string} description - Deskripsi singkat proyek
- * @property {string} demoURL - URL demo aplikasi (jika ada)
- * @property {string} repoURL - URL repository, contoh: https://github.com/username/repo
- * @property {string} anim - Animasi saat card ditampilkan, contoh: fade-up, fade-right, fade-left, fade-down
- * @property {number} averageBrightness - Tingkat kecerahan background card (opsional), contoh: 0.1
- */
-
-/**
- * @type {PortfolioData[]}
- */
-export const portfolioData = [
-    {
-        imgSrc: 'https://dt2sdf0db8zob.cloudfront.net/wp-content/uploads/2021/06/copy-of-the-6-best-restaurant-website-templates-1.png',
-        title: 'Restaurant System',
-        skills: ['React', 'StyledComponents'],
-        description: 'Aplikasi manajemen restoran dengan tampilan modern dan responsif.',
-        demoURL: '',
-        repoURL: '',
-        anim: 'fade-right',
-    },
-    {
-        imgSrc: 'https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs/299377097/original/7eb7dcebe244fcf5ad75d92b0969fc116946bd57/create-professional-amd-responsive-wordpress-website.jpg',
-        title: 'E-Commerce',
-        skills: ['JavaScript', 'Bootstrap'],
-        description: 'Platform e-commerce untuk pengelolaan produk, transaksi, dan pelanggan.',
-        demoURL: '',
-        repoURL: '',
-        anim: 'fade-up',
-        averageBrightness: 0.1,
-    },
-    // Tambahkan data portfolio lainnya di sini
-];
-
-const skillIcons = {
-    JavaScript: 'skill-icons:javascript',
-    React: 'skill-icons:react-dark',
-    Astro: 'skill-icons:astro',
-    CSS: 'skill-icons:css',
-    Sass: 'skill-icons:sass',
-    StyledComponents: 'skill-icons:styledcomponents',
-    Bootstrap: 'skill-icons:bootstrap',
-    Tailwind: 'skill-icons:tailwindcss-dark',
+export const FEATURES = {
+	blog: false, // true = tampilkan blog
 };
-
-/**
- * @description Mengubah data portfolio dengan menambahkan icon pada setiap skill
- */
-export const getPortfolioData = portfolioData.map((item) => ({
-    ...item,
-    skills: item.skills.map((skill) => skillIcons[skill]),
-}));
 ```
 
-> [!NOTE]
-> Untuk icon skill, kamu bisa menggunakan library dari Garrux: [https://github.com/Garruxx/ascii-icons](https://github.com/Garruxx/ascii-icons)
+Saat `false`: item menu "Blog" dan bagian Blog di beranda hilang, `/blog/` dialihkan ke beranda, halaman artikel tidak dibuat, dan blog dikeluarkan dari sitemap. File artikel di `src/content/blog/` tetap aman. Ubah ke `true` lalu build ulang untuk menampilkannya kembali.
 
-Data ini selanjutnya akan dikirim ke komponen portfolio sebagai props untuk ditampilkan di halaman portfolio.
+## Menambah proyek (Markdown)
 
-## Menambahkan Icon dengan Iconify
+Setiap proyek adalah satu file di `src/content/projects/`. **Nama file = slug** (alamat `/proyek/<slug>/`). Bagian di antara `---` adalah metadata, sisanya adalah deskripsi lengkap dalam Markdown yang ditampilkan di halaman detail.
 
-Project ini menggunakan **Iconify** untuk menampilkan icon. Untuk menambahkan icon baru, gunakan atribut `icon`.
+```md
+---
+title: "Mebook ERP"                        # judul singkat: kartu, judul halaman, menu
+fullTitle: "Mebook - Frontend Application Enterprise Resource Planning System (ERP)"   # opsional
+category: "Enterprise"
+image: "/img/portfolio/mebook-erp.png"     # relatif ke /public
+order: 1                                   # urutan tampil (kecil = lebih dulu)
+# lang: "en"                              # opsional: bahasa isi bila bukan Bahasa Indonesia (default "id")
+year: 2023
+skills: ["React", "Bootstrap"]             # ditulis bebas: "react", "Node.js", "tailwindcss" disamakan otomatis
+summary: "Ringkasan singkat untuk kartu dan meta description."
+# opsional — tampil di halaman detail bila diisi:
+# role: "Full Stack Developer"
+# demoURL: "https://..."
+# repoURL: "https://github.com/..."
+# highlights: ["Modul akuntansi", "Laporan keuangan"]
+---
 
-### Contoh
+## Penjelasan Singkat
 
-Untuk menampilkan icon React:
-
-```html
-<iconify-icon icon="logos:react" width="27" height="27"></iconify-icon>
+Tulis deskripsi lengkap di sini dengan Markdown biasa (judul, daftar, **tebal**, tautan, kode).
 ```
 
-Pada file `data.js`, tentukan identifier icon seperti berikut:
+Proyek juga boleh ditulis sebagai objek di `src/components/data/portfolioData.js` (format singkat tanpa isi Markdown). Bila slug-nya sama dengan file Markdown, file Markdown yang dipakai. Penggabungan kedua sumber ada di `src/lib/projects.ts`.
 
-```js
-{
-    title: "React",
-    link: "https://reactjs.org/",
-    icon: "logos:react"
-}
-```
+Nama teknologi pada `skills` dicocokkan dengan `skillsData.js` (alias `Go`/`Golang` dan `Tailwind`/`TailwindCSS` dianggap sama) sehingga halaman `/keterampilan/` otomatis menautkan proyeknya.
 
-### Menambahkan Script Iconify
+## Tema
 
-Tambahkan script Iconify ke dalam bagian `<head>` pada project kamu:
+Tema gelap/terang dapat diganti lewat tombol di header. Tanpa pilihan tersimpan, tema mengikuti sistem (`prefers-color-scheme`); pilihan disimpan di `localStorage`. Warna didefinisikan sebagai token di `src/styles/global.css`: `--accent` untuk teks/garis aksen dan `--accent-fill` untuk isian (tombol, hover, footer). Atribut `data-theme` dipasang oleh skrip kecil di `<head>` sebelum render pertama (tanpa kedipan).
 
-```html
-<head>
-    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
-</head>
-```
+## Sistem Animasi
 
-Setelah script ini ditambahkan, kamu sudah bisa menggunakan berbagai icon dari Iconify dengan menentukan identifier icon yang sesuai.
+Tampilan dirancang dengan bahasa visual **garis**: garis pemandu vertikal, rule yang tergambar saat digulir, bingkai yang digambar dengan DrawSVG, dan medan garis bergelombang di hero. Semua logika animasi ada di `src/scripts/`, dan komponen Astro hanya menandai elemen lewat atribut `data-*`.
+
+| Library | Dipakai untuk |
+| --- | --- |
+| **GSAP** (ScrollTrigger, SplitText, DrawSVG) | Intro timeline, judul per-kata/huruf, galeri horizontal ter-pin, parallax, rule & bingkai yang tergambar, marquee, medan garis di canvas |
+| **Motion** | Reveal berbasis `inView`, garis progres scroll, spring pada menu/nav/hover/tombol magnetik, kursor, popup "kembali ke atas" (muncul dengan spring + cincin progres), penyaring daftar |
+| **Lenis** | Smooth scroll yang disinkronkan ke ticker GSAP (`scripts/smooth.ts`) |
+
+Catatan:
+
+- `prefers-reduced-motion: reduce` dihormati: tanpa Lenis, tanpa pin, tanpa scrub — konten tampil statis.
+- Keadaan awal animasi hanya aktif bila kelas `js` terpasang di `<html>` (skrip inline di `Layout.astro`), sehingga konten tetap terbaca bila JavaScript gagal dimuat.
+- Atribut yang tersedia: `data-line` (rule tergambar), `data-split` (judul naik per kata saat masuk viewport), `data-scrub` (teks menyala mengikuti scroll), `data-reveal` / `data-reveal-group` (muncul saat masuk viewport), `data-magnetic` (tarik ke kursor).
 
 ## Teknologi yang Digunakan
 
-Template portfolio ini menggunakan beberapa teknologi modern untuk menghasilkan tampilan yang responsif, ringan, dan menarik secara visual:
-
-- **Astro**: Static site builder modern yang memungkinkan penggunaan berbagai framework seperti React, Vue, dan Svelte, serta dioptimalkan untuk performa dengan JavaScript yang minimal.
-- **React**: Library JavaScript untuk membangun antarmuka pengguna berbasis komponen yang dapat digunakan kembali.
-- **Tailwind CSS**: Framework CSS berbasis utility yang memungkinkan styling langsung di dalam markup dengan fleksibilitas dan kontrol penuh.
-- **Styled Components**: Library untuk React yang memungkinkan penggunaan styling pada level komponen menggunakan tagged template literals.
-- **Iconify**: Library icon lengkap yang menyediakan ribuan icon dari berbagai koleksi dengan satu format penulisan yang konsisten.
+- **Bun**: package manager & runtime.
+- **Astro 7**: Static site builder dengan JavaScript minimal.
+- **GSAP**, **Motion**, **Lenis**: sistem animasi (lihat di atas).
+- **Tailwind CSS 4** (via `@tailwindcss/vite`): saat ini hanya dipakai untuk preflight (reset); styling utama memakai CSS dengan design token di `src/styles/global.css`.
+- **React 19**: integrasi Astro masih aktif, namun saat ini belum ada komponen React.
+- **Geist**, **Geist Mono**, **Instrument Serif**: tipografi (Google Fonts).
 
 ## Desain Figma
 

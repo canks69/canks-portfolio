@@ -1,100 +1,377 @@
+/* Tailwind v4: hanya dipakai untuk preflight (reset). Berada di @layer, jadi CSS di bawah selalu menang. */
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Canks — design tokens & base
+   Bahasa visual: "garis" — hairline grid, rule yang tergambar, tipografi besar.
+   ========================================================================== */
+
 :root {
-	/* color  */
-	--primary-0: #190230;
-	--primary-10: #2b1560;
-	--primary-20: #442288;
-	--primary-30: #5529ae;
-	--primary-40: #6632cf;
-	--primary-50: #7644e3;
-	--primary-60: #8664ee;
-	--primary-70: #a491f4;
-	--primary-80: #c2b9f9;
-	--primary-90: #dcd8fc;
-	--primary-95: #edeafd;
-	--primary-99: #f4f4fe;
-	--primary-100: #ffffff;
-	--secondary-0: #1c050e;
-	--secondary-10: #490e25;
-	--secondary-20: #782344;
-	--secondary-30: #87224a;
-	--secondary-40: #ae285f;
-	--secondary-50: #c93978;
-	--secondary-60: #dc5898;
-	--secondary-70: #e77fb4;
-	--secondary-80: #f1b0d3;
-	--secondary-90: #f7d3e7;
-	--secondary-95: #fae9f3;
-	--secondary-99: #fcf3f8;
-	--secondary-100: #ffffff;
+	color-scheme: dark;
 
-	/* colores de las propiedades */
-	--surface: #4F4360;
-	--surface-variant: #e0d8e7;
-	--surface-dim: #998da9;
-	--surface-bridge: #d6cdee;
+	/* warna */
+	--bg: #0a0a0b;
+	--bg-raise: #111113;
+	--fg: #ecebe4;
+	--fg-dim: #a3a29b;
+	--fg-mute: #6e6d68;
+	--line: rgb(236 235 228 / 0.12);
+	--line-strong: rgb(236 235 228 / 0.28);
+	/* --accent: untuk teks, garis & ikon di atas --bg.
+	   --accent-fill: untuk isian (tombol, hover, footer) dengan teks --accent-ink di atasnya. */
+	--accent: #c8ff3d;
+	--accent-fill: #c8ff3d;
+	--accent-ink: #0a0a0b;
+	--header-bg: rgb(10 10 11 / 0.72);
 
-	--primary: var(--primary-60);
-	--on-surface-primary: var(--primary-10);
-	--on-primary: var(--primary-95);
+	/* tipografi */
+	--font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+	--font-serif: 'Instrument Serif', 'Times New Roman', serif;
 
-	--secndary: var(--secondary-70);
-	--on-surface-secondary: var(--secondary-95);
-	--on-secondary: var(--secondary-95);
+	--fs-mono: 0.75rem;
+	--fs-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+	--fs-lead: clamp(1.375rem, 1rem + 1.4vw, 2.25rem);
+	--fs-h2: clamp(3rem, 1.2rem + 7vw, 8.5rem);
+	--fs-h3: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
 
-	/* texto  */
-	--text-small: 1.2rem;
-	--text-medium: 1.4rem;
-	--text-large: 1.6rem;
-	--text-x-large: 2rem;
-	--text-xx-large: 3.1rem;
-	--text-xxx-large: 4.4rem;
-	--text-title: 2rem;
-	--text-general: 1.6rem;
-	--text-button: 1.2rem;
-	--font-montserrat: 'Montserrat', sans-serif;
-	--max-width: 108rem;
-	--site-bg: var(--primary-0);
-	--hero-bg: linear-gradient(
-		-54deg,
-		var(--primary-0) -23%,
-		var(--primary-20),
-		var(--primary-0) 51%
-	);
+	/* layout */
+	--gutter: clamp(0.75rem, 3vw, 2.5rem); /* jarak garis pemandu dari tepi layar */
+	--pad: clamp(1rem, 2.4vw, 2rem); /* jarak konten dari garis pemandu */
+	--edge: calc(var(--gutter) + var(--pad));
+	--max: 90rem;
+	--frame: calc(var(--max) + 2 * var(--edge));
+	--header-h: 4.5rem;
 
-	--text-gradient: radial-gradient(
-		circle farthest-corner at center center,
-		#58f9ff 0%,
-		#df44e7 100%
-	);
+	/* gerak */
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
 }
-*{
+
+/* Tema terang — dipasang lewat <html data-theme="light"> (skrip di Layout.astro + scripts/theme.ts).
+   Isian aksen tetap lime berteks gelap; hanya teks/garis aksen yang dipekatkan agar terbaca di latar terang. */
+:root[data-theme='light'] {
+	color-scheme: light;
+	--bg: #f3f2ec;
+	--bg-raise: #fbfaf6;
+	--fg: #0e0e0f;
+	--fg-dim: #55544f;
+	--fg-mute: #8c8b84;
+	--line: rgb(14 14 15 / 0.12);
+	--line-strong: rgb(14 14 15 / 0.3);
+	--accent: #3b7d00;
+	--header-bg: rgb(243 242 236 / 0.78);
+}
+
+*,
+*::before,
+*::after {
 	box-sizing: border-box;
 }
+
 html {
-	font-family: var(--font-montserrat) !important;
-	font-size: 62.5%;
-	scroll-behavior: smooth;
+	background: var(--bg);
+	color: var(--fg);
+	font-family: var(--font-sans);
+	font-size: 100%;
+	-webkit-text-size-adjust: 100%;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
 body {
+	margin: 0;
+	min-height: 100svh;
+	background: var(--bg);
+	font-size: var(--fs-body);
+	line-height: 1.6;
+	overflow-x: clip;
+}
+
+::selection {
+	background: var(--accent-fill);
+	color: var(--accent-ink);
+}
+
+p {
+	margin: 0;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 4px;
+	border-radius: 2px;
+}
+
+.skip-link {
+	position: fixed;
+	left: var(--gutter);
+	top: 0.75rem;
+	z-index: 200;
+	padding: 0.6rem 1rem;
+	background: var(--accent-fill);
+	color: var(--accent-ink);
+	font: 500 var(--fs-mono) / 1 var(--font-mono);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	transform: translateY(-200%);
+}
+.skip-link:focus {
+	transform: none;
+}
+
+/* Transisi pergantian tema: lingkaran yang meluas dari tombol (View Transitions API).
+   Animasinya dijalankan di scripts/theme.ts; di sini hanya mematikan crossfade bawaan. */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+	z-index: 1;
+}
+::view-transition-new(root) {
+	z-index: 2;
+}
+
+/* ---------- layout ---------- */
+
+main,
+.site-footer {
+	position: relative;
+	z-index: 1;
+}
+
+.wrap {
 	width: 100%;
-	background: var(--site-bg) no-repeat;
-	background: var(--site-bg) no-repeat;
-}
-main {
-	align-self: center;
-}
-p{
-	color: var(--primary-100);
-	font-size: var(--text-general);
+	max-width: var(--frame);
+	margin-inline: auto;
+	padding-inline: var(--edge);
 }
 
-.color__gradiente {
-	background: var(--text-gradient);
-	-webkit-background-clip: text;
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
+/* ---------- tipografi util ---------- */
+
+.mono {
+	font-family: var(--font-mono);
+	font-size: var(--fs-mono);
+	font-weight: 450;
+	line-height: 1.4;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--fg-dim);
 }
 
-.max__width {
-	max-width: 117.8rem;
+.serif {
+	font-family: var(--font-serif);
+	font-style: italic;
+	font-weight: 400;
+	letter-spacing: -0.01em;
+}
+
+.display {
+	font-size: var(--fs-h2);
+	font-weight: 560;
+	line-height: 0.92;
+	letter-spacing: -0.055em;
+	text-wrap: balance;
+}
+
+.display .serif,
+.lead .serif {
+	letter-spacing: -0.02em;
+	padding-right: 0.06em;
+}
+
+.lead {
+	font-size: var(--fs-lead);
+	font-weight: 420;
+	line-height: 1.22;
+	letter-spacing: -0.025em;
+	text-wrap: pretty;
+}
+
+/* ---------- garis ---------- */
+
+/* Keadaan awal animasi hanya aktif bila JS jalan & gerak tidak dikurangi.
+   Kelas .js dipasang oleh skrip inline di <head> (lihat Layout.astro). */
+.js [data-line] {
+	transform: scaleX(0);
+}
+.js [data-line-y] {
+	transform: scaleY(0);
+}
+.js [data-reveal] {
+	opacity: 0;
+	transform: translateY(28px);
+}
+.js [data-intro],
+.js [data-title],
+.js [data-split],
+.js [data-header-bar] {
+	visibility: hidden;
+}
+
+/* Mask hasil SplitText (kelas "<wordsClass>-mask" / "<charsClass>-mask").
+   Padding + margin negatif memberi ruang pada descender, italic & letter-spacing negatif
+   tanpa mengubah tata letak. */
+.w-mask,
+.ch-mask {
+	padding: 0.1em 0.14em 0.2em;
+	margin: -0.1em -0.14em -0.2em;
+}
+
+/* ---------- custom cursor ---------- */
+
+.cursor {
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 300;
+	pointer-events: none;
+	mix-blend-mode: difference;
+	opacity: 0;
+	transition: opacity 0.3s;
+	will-change: transform;
+}
+.cursor.is-visible {
+	opacity: 1;
+}
+.cursor__ring {
+	display: block;
+	width: 2.25rem;
+	height: 2.25rem;
+	margin: -1.125rem 0 0 -1.125rem;
+	border: 1px solid #fff;
+	border-radius: 50%;
+}
+@media (hover: none), (pointer: coarse) {
+	.cursor {
+		display: none;
+	}
+}
+
+/* ---------- prose (artikel blog) ---------- */
+
+.prose {
+	font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+	line-height: 1.75;
+	color: var(--fg-dim);
+}
+.prose > * + * {
+	margin-top: 1.5em;
+}
+.prose p {
+	color: var(--fg-dim);
+	font-size: inherit;
+}
+.prose strong {
+	color: var(--fg);
+	font-weight: 600;
+}
+.prose a {
+	color: var(--fg);
+	background: linear-gradient(var(--accent), var(--accent)) 0 100% / 100% 1px no-repeat;
+	padding-bottom: 2px;
+	transition: background-size 0.4s var(--ease-out), color 0.3s;
+}
+.prose a:hover {
+	background-image: linear-gradient(var(--accent-fill), var(--accent-fill));
+	background-size: 100% 100%;
+	color: var(--accent-ink);
+}
+.prose h2,
+.prose h3,
+.prose h4 {
+	color: var(--fg);
+	font-weight: 560;
+	line-height: 1.05;
+	letter-spacing: -0.04em;
+	margin-top: 2.4em;
+}
+.prose h2 {
+	font-size: clamp(1.9rem, 1.4rem + 2vw, 3rem);
+	padding-top: 1.1em;
+	border-top: 1px solid var(--line-strong);
+}
+.prose h3 {
+	font-size: clamp(1.4rem, 1.2rem + 1vw, 2rem);
+}
+.prose h4 {
+	font-size: 1.25rem;
+}
+.prose code {
+	font-family: var(--font-mono);
+	font-size: 0.86em;
+	padding: 0.15em 0.4em;
+	border: 1px solid var(--line);
+	background: var(--bg-raise);
+	color: var(--fg);
+}
+.prose pre {
+	margin-block: 2em;
+	padding: 1.25rem 1.5rem;
+	overflow-x: auto;
+	background: var(--bg-raise) !important;
+	border: 1px solid var(--line);
+	border-left: 2px solid var(--accent);
+	font-size: 0.9rem;
+	line-height: 1.7;
+}
+.prose pre code {
+	padding: 0;
+	border: 0;
+	background: none;
+	font-size: inherit;
+}
+.prose img {
+	width: 100%;
+	height: auto;
+	border: 1px solid var(--line);
+}
+.prose ul,
+.prose ol {
+	padding-left: 1.4em;
+	list-style: revert;
+}
+.prose li + li {
+	margin-top: 0.4em;
+}
+.prose table {
+	display: block;
+	width: 100%;
+	overflow-x: auto;
+	border-collapse: collapse;
+	font-size: 0.9em;
+}
+.prose th,
+.prose td {
+	padding: 0.75rem 1rem 0.75rem 0;
+	border-bottom: 1px solid var(--line);
+	text-align: left;
+	vertical-align: top;
+}
+.prose th {
+	border-bottom-color: var(--line-strong);
+	color: var(--fg);
+	font: 450 var(--fs-mono) / 1.4 var(--font-mono);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+.prose blockquote {
+	margin-inline: 0;
+	padding-left: 1.5rem;
+	border-left: 2px solid var(--accent);
+	color: var(--fg);
 }

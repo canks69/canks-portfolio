@@ -1,0 +1,27 @@
+---
+interface Props {
+	no: string;
+	label: string;
+}
+const { no, label } = Astro.props;
+---
+
+<div class="section-head">
+	<span class="mono">({no})</span>
+	<i class="section-head__line" data-line aria-hidden="true"></i>
+	<span class="mono">{label}</span>
+</div>
+
+<style>
+	.section-head {
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+	}
+	.section-head__line {
+		flex: 1;
+		height: 1px;
+		background: var(--line-strong);
+		transform-origin: left;
+	}
+</style>

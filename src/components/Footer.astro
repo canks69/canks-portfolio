@@ -1,0 +1,122 @@
+---
+import SocialLinks from './SocialLinks.astro';
+import { FEATURES } from './data/site.js';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" data-footer>
+	<div class="wrap footer__inner">
+		<div class="footer__top">
+			<p class="mono footer__eyebrow">({FEATURES.blog ? '05' : '04'}) Kontak</p>
+			<h2 class="footer__cta" data-split>Ada proyek? <span class="serif">Mari berbincang.</span></h2>
+		</div>
+
+		<a class="footer__mail" href="mailto:official.canks@gmail.com" data-magnetic data-footer-mail>
+			<span class="footer__mail-text">official.canks@gmail.com</span>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M4 20 20 4M7 4h13v13" fill="none" stroke="currentColor" stroke-width="1.6" data-footer-arrow />
+			</svg>
+			<i class="footer__mail-line" data-line aria-hidden="true"></i>
+		</a>
+
+		<div class="footer__bar">
+			<SocialLinks class="footer__social" />
+			<p class="mono">© {year} Canks</p>
+		</div>
+	</div>
+
+	<div class="footer__word" aria-hidden="true" data-footer-word>Canks</div>
+</footer>
+
+<style>
+	.site-footer {
+		position: relative;
+		overflow: hidden;
+		background: var(--accent-fill);
+		color: var(--accent-ink);
+	}
+	.site-footer :global(.mono),
+	.site-footer :global(.social__link) {
+		color: var(--accent-ink);
+	}
+	.footer__inner {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(2rem, 5vw, 4rem);
+		padding-block: clamp(4rem, 9vw, 8rem) 2rem;
+	}
+	.footer__top {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	.footer__cta {
+		max-width: 12ch;
+		font-size: clamp(3rem, 1rem + 7.5vw, 9rem);
+		font-weight: 560;
+		line-height: 0.92;
+		letter-spacing: -0.06em;
+		text-wrap: balance;
+	}
+	.footer__cta :global(.serif) {
+		padding-right: 0.08em;
+	}
+
+	.footer__mail {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: space-between;
+		align-self: stretch;
+		gap: 1.5rem;
+		padding-block: 1.25rem;
+	}
+	.footer__mail-text {
+		font-size: clamp(1.5rem, 0.5rem + 3.6vw, 4rem);
+		font-weight: 500;
+		letter-spacing: -0.05em;
+		overflow-wrap: anywhere;
+	}
+	.footer__mail svg {
+		flex: none;
+		width: clamp(1.75rem, 4vw, 3.5rem);
+		height: clamp(1.75rem, 4vw, 3.5rem);
+		transition: transform 0.6s var(--ease-out);
+	}
+	.footer__mail:hover svg {
+		transform: translate(4px, -4px) rotate(45deg);
+	}
+	.footer__mail-line {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 1px;
+		background: var(--accent-ink);
+		transform-origin: left;
+	}
+
+	.footer__bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem 2rem;
+	}
+	/* wordmark raksasa yang terpotong di dasar halaman */
+	.footer__word {
+		margin-top: 1rem;
+		margin-bottom: -0.1em;
+		font-size: min(28.5vw, 26rem);
+		font-weight: 600;
+		line-height: 0.8;
+		letter-spacing: -0.07em;
+		text-transform: uppercase;
+		text-align: center;
+		white-space: nowrap;
+		color: transparent;
+		-webkit-text-stroke: 1.5px var(--accent-ink);
+		user-select: none;
+		pointer-events: none;
+	}
+</style>

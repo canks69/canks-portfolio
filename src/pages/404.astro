@@ -1,11 +1,52 @@
 ---
-import Boton from "../components/atoms/Boton.astro";
-import Layout from "../layouts/Layout.astro";
-
+import Button from '../components/Button.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { menuPage } from '../components/data/menuData';
+import Layout from '../layouts/Layout.astro';
 
 ---
 
-<Layout title="Pagina no encontrada">
-        <h1 class="text-xl">Pagina no encontrada</h1>
-        <Boton texto="Regresar" href="/"/>
+<Layout title="404 | Halaman tidak ditemukan" noindex>
+	<Header origin={menuPage} />
+	<main id="main" class="nf">
+		<div class="wrap nf__inner">
+			<p class="mono" data-intro data-page-meta>(Kesalahan 404)</p>
+			<h1 class="nf__code" data-title aria-label="404">404</h1>
+			<p class="lead nf__text" data-intro data-page-meta>
+				Halaman yang kamu cari <span class="serif">tidak ditemukan.</span>
+			</p>
+			<div data-intro data-page-meta>
+				<Button href="/">Kembali ke beranda</Button>
+			</div>
+		</div>
+	</main>
+	<Footer />
 </Layout>
+
+<style>
+	.nf {
+		min-height: 100svh;
+		display: flex;
+		padding-top: var(--header-h);
+	}
+	.nf__inner {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-start;
+		gap: 2rem;
+		padding-block: 4rem;
+	}
+	.nf__code {
+		font-size: min(40vw, 30rem);
+		font-weight: 600;
+		line-height: 0.8;
+		letter-spacing: -0.07em;
+		color: var(--accent);
+	}
+	.nf__text :global(.serif) {
+		color: var(--accent);
+	}
+</style>

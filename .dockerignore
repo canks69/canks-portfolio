@@ -1,0 +1,12 @@
+# Jangan ikut ke build context — node_modules hasil macOS akan menimpa hasil `bun install` di dalam image
+node_modules
+dist
+.astro
+.git
+.github
+.vscode
+.DS_Store
+.env
+.env.*
+npm-debug.log*
+*.local-note.ipynb

@@ -1,29 +1,23 @@
-# Gunakan image Node.js sebagai base image
-FROM node:18-alpine AS build
+# ---- Tahap build: Bun ----
+FROM oven/bun:1-alpine AS build
 
-# Tentukan direktori kerja di dalam container
 WORKDIR /app
 
-# Salin package.json dan package-lock.json untuk menghindari mengulang instalasi dependensi jika tidak ada perubahan
-COPY package*.json ./
+# Salin manifest + lockfile dulu agar layer instalasi di-cache selama dependensi tidak berubah
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Install dependencies
-RUN npm install
-
-# Salin seluruh file aplikasi ke dalam container
+# Salin sisa source (node_modules & dist dikecualikan lewat .dockerignore)
 COPY . .
 
-# Build proyek Astro untuk produksi
-RUN npm run build
+# Build Astro memakai runtime Bun (image ini tidak punya Node.js)
+RUN bun --bun run build
 
-# Gunakan image nginx untuk menampilkan aplikasi hasil build
+# ---- Tahap serve: nginx ----
 FROM nginx:alpine
 
-# Salin hasil build dari tahap sebelumnya ke direktori yang akan dilayani oleh nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80 untuk akses web
 EXPOSE 80
 
-# Jalankan nginx untuk melayani aplikasi
 CMD ["nginx", "-g", "daemon off;"]

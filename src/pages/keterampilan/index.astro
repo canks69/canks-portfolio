@@ -1,0 +1,202 @@
+---
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import PageHead from '../../components/PageHead.astro';
+import Rule from '../../components/Rule.astro';
+import { menuPage } from '../../components/data/menuData';
+import { skillKey } from '../../components/data/helpers.js';
+import { getProjects } from '../../lib/projects';
+import { siteStack, skillGroups } from '../../components/data/skillsData.js';
+import Layout from '../../layouts/Layout.astro';
+
+const projects = await getProjects();
+
+// teknologi → daftar proyek yang memakainya (dari data portofolio)
+const usedIn = new Map<string, typeof projects>();
+for (const p of projects) {
+	for (const s of p.skills) {
+		const key = skillKey(s);
+		usedIn.set(key, [...(usedIn.get(key) ?? []), p]);
+	}
+}
+
+const groups = skillGroups.map((g) => ({
+	...g,
+	items: g.items.map((name) => ({
+		name,
+		key: skillKey(name),
+		projects: usedIn.get(skillKey(name)) ?? [],
+	})),
+}));
+---
+
+<Layout
+	title="Keterampilan | Canks"
+	description="Teknologi yang saya gunakan — dari backend, frontend, database, hingga DevOps — beserta proyek tempat teknologi itu dipakai."
+>
+	<Header origin={menuPage} />
+	<main id="main">
+		<PageHead eyebrow="(Stack)">
+			Keterampilan
+			<Fragment slot="lead">
+				Berpengalaman sebagai Full Stack Developer dalam membangun aplikasi web dari perancangan hingga deployment.
+				Teknologi yang tercatat pada proyek ditautkan langsung ke proyeknya.
+			</Fragment>
+		</PageHead>
+
+		<div class="stack">
+			{
+				groups.map((g, gi) => (
+					<section class="stack__group" aria-labelledby={`g-${gi}`}>
+						<Rule />
+						<div class="wrap stack__inner">
+							<h2 class="stack__title mono" id={`g-${gi}`} data-reveal>
+								<span>{String(gi + 1).padStart(2, '0')}</span>
+								{g.title}
+							</h2>
+							<ul class="stack__list" data-reveal-group>
+								{g.items.map((item) => (
+									<li class="skill" id={item.key}>
+										<span class="skill__name">{item.name}</span>
+										<span class="skill__projects">
+											{item.projects.map((p) => (
+												<a class="mono" href={`/proyek/${p.slug}/`}>
+													{p.title}
+												</a>
+											))}
+											{item.projects.length === 0 && <span class="mono skill__none">—</span>}
+										</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					</section>
+				))
+			}
+
+			<section class="stack__group" aria-labelledby="g-site">
+				<Rule />
+				<div class="wrap stack__inner">
+					<h2 class="stack__title mono" id="g-site" data-reveal>
+						<span>{String(groups.length + 1).padStart(2, '0')}</span>
+						Kolofon
+					</h2>
+					<div class="colophon" data-reveal>
+						<p class="lead">
+							Situs ini dibangun dengan <em class="serif">garis</em> — dan perangkat berikut.
+						</p>
+						<ul class="colophon__tags">
+							{siteStack.map((s) => <li class="mono">{s}</li>)}
+						</ul>
+					</div>
+				</div>
+			</section>
+		</div>
+	</main>
+	<Footer />
+</Layout>
+
+<style>
+	.stack {
+		padding-bottom: clamp(4rem, 9vw, 7rem);
+	}
+	.stack__inner {
+		display: grid;
+		gap: 1.5rem;
+		padding-block: 2rem clamp(2.5rem, 6vw, 4.5rem);
+	}
+	.stack__title {
+		display: flex;
+		gap: 0.75rem;
+		margin: 0;
+		color: var(--fg);
+		scroll-margin-top: var(--header-h);
+	}
+	.stack__title span {
+		color: var(--accent);
+	}
+	.stack__list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--line-strong);
+	}
+	.skill {
+		display: grid;
+		gap: 0.6rem;
+		padding-block: 1.1rem;
+		border-bottom: 1px solid var(--line);
+		scroll-margin-top: calc(var(--header-h) + 1rem);
+	}
+	/* target #anchor dari halaman proyek */
+	.skill:target .skill__name {
+		color: var(--accent);
+	}
+	.skill__name {
+		font-size: var(--fs-h3);
+		font-weight: 560;
+		line-height: 1;
+		letter-spacing: -0.045em;
+		transition: color 0.3s;
+	}
+	.skill__projects {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: center;
+	}
+	.skill__projects a {
+		padding: 0.25rem 0.55rem;
+		border: 1px solid var(--line-strong);
+		color: var(--fg-dim);
+		transition: color 0.3s, background 0.3s, border-color 0.3s;
+	}
+	.skill__projects a:hover {
+		background: var(--accent-fill);
+		border-color: var(--accent-fill);
+		color: var(--accent-ink);
+	}
+	.skill__none {
+		color: var(--fg-mute);
+	}
+
+	.colophon {
+		display: grid;
+		gap: 1.5rem;
+		border-top: 1px solid var(--line-strong);
+		padding-top: 1.5rem;
+	}
+	.colophon .serif {
+		color: var(--accent);
+	}
+	.colophon__tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.colophon__tags li {
+		padding: 0.3rem 0.65rem;
+		border: 1px solid var(--line-strong);
+		color: var(--fg-dim);
+	}
+
+	@media (min-width: 900px) {
+		.stack__inner {
+			grid-template-columns: 4fr 8fr;
+			gap: 3rem;
+		}
+		.stack__title {
+			position: sticky;
+			top: calc(var(--header-h) + 1.5rem);
+			align-self: start;
+		}
+		.skill {
+			grid-template-columns: 1fr 1.4fr;
+			align-items: center;
+			gap: 1.5rem;
+		}
+	}
+</style>

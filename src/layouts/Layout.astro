@@ -1,33 +1,113 @@
 ---
-import "../styles/global.css"
+import '../styles/global.css';
+import BackToTop from '../components/BackToTop.astro';
+import GuideLines from '../components/GuideLines.astro';
+import { SITE } from '../components/data/site.js';
+
 interface Props {
 	title: string;
+	description?: string;
+	/** gambar pratinjau (path atau URL); default /og.png */
+	image?: string;
+	/** teks alternatif gambar pratinjau */
+	imageAlt?: string;
+	/** jenis konten Open Graph */
+	type?: 'website' | 'article';
+	/** jangan diindeks mesin pencari (mis. 404, halaman contoh) */
+	noindex?: boolean;
+	/** structured data (JSON-LD): satu objek atau beberapa */
+	jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
-const { title } = Astro.props;
+
+// ≤160 karakter agar tidak terpotong di hasil pencarian
+const defaultDescription =
+	'Canks, Full Stack Developer sejak 2020. Membangun aplikasi web dari perancangan hingga deployment: ERP, POS, inventori, dan sistem enterprise.';
+const {
+	title,
+	description = defaultDescription,
+	image = SITE.image,
+	imageAlt = SITE.imageAlt,
+	type = 'website',
+	noindex = false,
+	jsonLd,
+} = Astro.props;
+
+// URL absolut: canonical memakai host produksi (SITE.url), bukan host build/preview
+const canonical = new URL(Astro.url.pathname, SITE.url).toString();
+const imageUrl = new URL(image, SITE.url).toString();
+const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
 
 <!doctype html>
 <html lang="id">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="title" content={title} />
-		<meta name="site_name" content="Canks Full Stack Developer" />
-		<meta name="description" content="Saya pengembang web sejak 2020, dengan minat besar terhadap teknologi. Saya terus belajar dan mengikuti perkembangan terbaru untuk memahami cara perusahaan teknologi terkemuka menciptakan sistem yang andal" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#0a0a0b" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="author" content={SITE.name} />
+		<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+		<link rel="canonical" href={canonical} />
+		<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+		<!-- Open Graph / Twitter -->
+		<meta property="og:site_name" content={SITE.name} />
+		<meta property="og:locale" content={SITE.locale} />
+		<meta property="og:type" content={type} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={imageUrl} />
+		<meta property="og:image:alt" content={imageAlt} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={imageUrl} />
+		<meta name="twitter:image:alt" content={imageAlt} />
+
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" sizes="any" />
 		<meta name="generator" content={Astro.generator} />
-		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap"
 			rel="stylesheet"
 		/>
-		<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
-		<title>{title}</title>
-	</head>
-	<body class="flex flex-col">
+		<!-- Dijalankan sebelum render pertama:
+		     1) tema: pilihan tersimpan → bila tidak ada, ikuti sistem (mencegah kedipan tema salah)
+		     2) keadaan awal animasi hanya dipasang bila gerak tidak dikurangi; bila skrip utama gagal
+		        dimuat dalam 4 detik, konten dimunculkan apa adanya. -->
+		<script is:inline>
+			(function () {
+				var d = document.documentElement;
+				var t = null;
+				try {
+					t = localStorage.getItem('theme');
+				} catch (e) {}
+				if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+				d.dataset.theme = t;
+				var m = document.querySelector('meta[name="theme-color"]');
+				if (m) m.setAttribute('content', t === 'light' ? '#f3f2ec' : '#0a0a0b');
 
-			<slot/>
+				if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				d.classList.add('js');
+				setTimeout(function () {
+					if (!d.dataset.ready) d.classList.remove('js');
+				}, 4000);
+			})();
+		</script>
+		{ld.map((data) => <script type="application/ld+json" set:html={JSON.stringify(data)} />)}
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Lewati ke konten</a>
+		<GuideLines />
+		<slot />
+		<BackToTop />
+		<div class="cursor" data-cursor aria-hidden="true"><span class="cursor__ring" data-cursor-ring></span></div>
+		<script>
+			import '../scripts/main';
+		</script>
 	</body>
 </html>

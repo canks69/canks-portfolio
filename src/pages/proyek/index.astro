@@ -1,0 +1,162 @@
+---
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import PageHead from '../../components/PageHead.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { menuPage } from '../../components/data/menuData';
+import { getProjects } from '../../lib/projects';
+import { skillKey } from '../../components/data/helpers.js';
+import Layout from '../../layouts/Layout.astro';
+
+const projects = await getProjects();
+
+// semua teknologi yang muncul di proyek, diurutkan berdasarkan jumlah pemakaian
+const counts = new Map<string, { label: string; n: number }>();
+for (const p of projects) {
+	for (const s of p.skills) {
+		const key = skillKey(s);
+		counts.set(key, { label: s, n: (counts.get(key)?.n ?? 0) + 1 });
+	}
+}
+const filters = [...counts.entries()].sort((a, b) => b[1].n - a[1].n || a[1].label.localeCompare(b[1].label));
+---
+
+<Layout
+	title="Portofolio | Canks"
+	description="Kumpulan proyek yang pernah saya kerjakan: sistem ERP, inventori, point of sale, ujian online, dan aplikasi enterprise."
+>
+	<Header origin={menuPage} />
+	<main id="main">
+		<PageHead eyebrow={`(${String(projects.length).padStart(2, '0')}) proyek`}>
+			Portofolio
+			<Fragment slot="lead">
+				Sistem ERP, inventori, point of sale, hingga ujian online — semua proyek yang pernah saya kerjakan.
+			</Fragment>
+		</PageHead>
+
+		<section class="wrap projects" data-projects>
+			<div class="projects__filter" role="group" aria-label="Saring berdasarkan teknologi" data-reveal>
+				<button type="button" class="chip mono" aria-pressed="true" data-filter="all">
+					Semua <span>{projects.length}</span>
+				</button>
+				{
+					filters.map(([key, f]) => (
+						<button type="button" class="chip mono" aria-pressed="false" data-filter={key}>
+							{f.label} <span>{f.n}</span>
+						</button>
+					))
+				}
+			</div>
+
+			<ul class="projects__grid" data-reveal-group>
+				{
+					projects.map((p, i) => (
+						<li data-project data-tags={p.skills.map(skillKey).join('|')}>
+							<ProjectCard project={p} index={i} />
+						</li>
+					))
+				}
+			</ul>
+			<p class="mono projects__empty" hidden data-empty>Tidak ada proyek dengan teknologi ini.</p>
+		</section>
+	</main>
+	<Footer />
+</Layout>
+
+<style>
+	.projects {
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
+		padding-bottom: clamp(5rem, 12vw, 9rem);
+	}
+	.projects__filter {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		padding-block: 1.25rem;
+		border-block: 1px solid var(--line-strong);
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.5rem 0.85rem;
+		background: transparent;
+		border: 1px solid var(--line-strong);
+		color: var(--fg-dim);
+		cursor: pointer;
+		transition: color 0.3s, background 0.3s, border-color 0.3s;
+	}
+	.chip span {
+		color: var(--fg-mute);
+	}
+	.chip:hover {
+		color: var(--fg);
+		border-color: var(--fg-dim);
+	}
+	.chip[aria-pressed='true'] {
+		background: var(--accent-fill);
+		border-color: var(--accent-fill);
+		color: var(--accent-ink);
+	}
+	.chip[aria-pressed='true'] span {
+		color: var(--accent-ink);
+		opacity: 0.6;
+	}
+	.projects__grid {
+		display: grid;
+		gap: clamp(2rem, 4vw, 3rem) 2rem;
+		grid-template-columns: 1fr;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.projects__grid > li {
+		display: flex;
+	}
+	.projects__grid > li[hidden] {
+		display: none;
+	}
+	@media (min-width: 640px) {
+		.projects__grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+	@media (min-width: 1024px) {
+		.projects__grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+</style>
+
+<script>
+	import { animate } from 'motion';
+
+	const root = document.querySelector<HTMLElement>('[data-projects]');
+	if (root) {
+		const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+		const items = Array.from(root.querySelectorAll<HTMLElement>('[data-project]'));
+		const empty = root.querySelector<HTMLElement>('[data-empty]');
+
+		const apply = (key: string) => {
+			chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.filter === key)));
+			let shown = 0;
+			items.forEach((item) => {
+				const match = key === 'all' || (item.dataset.tags ?? '').split('|').includes(key);
+				const wasHidden = item.hidden;
+				item.hidden = !match;
+				if (match) {
+					shown++;
+					// hanya animasikan kartu yang baru muncul
+					if (wasHidden) {
+						animate(item, { opacity: [0, 1], y: [24, 0] }, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+					}
+				}
+			});
+			if (empty) empty.hidden = shown > 0;
+		};
+
+		chips.forEach((chip) => chip.addEventListener('click', () => apply(chip.dataset.filter ?? 'all')));
+	}
+</script>

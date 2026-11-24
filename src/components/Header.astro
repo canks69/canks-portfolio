@@ -1,5 +1,6 @@
 ---
 import Button from './Button.astro';
+import { SITE } from './data/site.js';
 
 interface MenuItem {
 	link: string;
@@ -93,7 +94,7 @@ const isCurrent = (link: string) =>
 				))
 			}
 		</ul>
-		<a class="menu__mail mono" href="mailto:official.canks@gmail.com" data-menu-item>official.canks@gmail.com</a>
+		<a class="menu__mail mono" href={`mailto:${SITE.email}`} data-menu-item>{SITE.email}</a>
 	</div>
 </div>
 

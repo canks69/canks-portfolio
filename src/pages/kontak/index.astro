@@ -3,9 +3,10 @@ import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import PageHead from '../../components/PageHead.astro';
 import { menuPage } from '../../components/data/menuData';
+import { SITE } from '../../components/data/site.js';
 import Layout from '../../layouts/Layout.astro';
 
-const EMAIL = 'official.canks@gmail.com';
+const EMAIL = SITE.email;
 
 const channels = [
 	{ label: 'Email', value: EMAIL, href: `mailto:${EMAIL}` },

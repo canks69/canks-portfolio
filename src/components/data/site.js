@@ -8,6 +8,8 @@ export const SITE = {
 	/** alamat produksi (host kanonik = tanpa www; www sudah dialihkan 301 oleh server) */
 	url: 'https://canks.dev',
 	name: 'Canks',
+	/** email kontak — dipakai di header, footer, dan halaman Kontak */
+	email: 'canks.official@gmail.com',
 	jobTitle: 'Full Stack Developer',
 	locale: 'id_ID',
 	/** gambar pratinjau default (1200×630, relatif ke /public) */

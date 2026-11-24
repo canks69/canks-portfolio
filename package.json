@@ -2,7 +2,8 @@
   "name": "canks-portfolio",
   "version": "0.0.1",
   "type": "module",
-  "description": "Personal portfolio built with Astro, React, and TailwindCSS",
+  "description": "Personal portfolio built with Astro, GSAP, Motion, Lenis, and Three.js",
+  "homepage": "https://canks.dev",
   "main": "index.astro",
   "packageManager": "bun@1.4.0",
   "scripts": {
@@ -25,21 +26,24 @@
     "tailwindcss": "^4.3.5",
     "three": "^0.187.0"
   },
+  "devDependencies": {
+    "@types/three": "^0.187.0"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SofiDevO/portfolio-astrosofidev-garrux.git"
+    "url": "git+https://github.com/canks69/canks-portfolio.git"
   },
   "keywords": [
     "astro",
-    "frontend",
     "portfolio",
-    "javascript",
-    "portafolio",
-    "css",
-    "tailwind"
+    "frontend",
+    "fullstack",
+    "gsap",
+    "motion",
+    "lenis",
+    "threejs",
+    "webgl",
+    "bun"
   ],
-  "author": "Canks / Muh Ihsan Nur",
-  "devDependencies": {
-    "@types/three": "^0.187.0"
-  }
+  "author": "Canks / Muh Ihsan Nur"
 }

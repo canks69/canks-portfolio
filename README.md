@@ -101,11 +101,13 @@ Tampilan dirancang dengan bahasa visual **garis**: garis pemandu vertikal, rule 
 | --- | --- |
 | **GSAP** (ScrollTrigger, SplitText, DrawSVG) | Intro timeline, judul per-kata/huruf, galeri horizontal ter-pin, parallax, rule & bingkai yang tergambar, marquee, medan garis di canvas |
 | **Motion** | Reveal berbasis `inView`, garis progres scroll, spring pada menu/nav/hover/tombol magnetik, kursor, popup "kembali ke atas" (muncul dengan spring + cincin progres), penyaring daftar |
+| **Three.js** (WebGL) | Latar hero: lanskap garis 3D dalam satu draw call; gelombang, riak kursor, dan amplitudo-saat-digulir dihitung di vertex shader; warna mengikuti tema; render berhenti saat hero tidak terlihat. Dimuat sebagai chunk terpisah (`scripts/heroScene.ts`, dynamic import) hanya di halaman yang punya hero |
 | **Lenis** | Smooth scroll yang disinkronkan ke ticker GSAP (`scripts/smooth.ts`) |
 
 Catatan:
 
-- `prefers-reduced-motion: reduce` dihormati: tanpa Lenis, tanpa pin, tanpa scrub — konten tampil statis.
+- `prefers-reduced-motion: reduce` dihormati: tanpa Lenis, tanpa pin, tanpa scrub — konten tampil statis, dan latar Three.js dirender sebagai satu bingkai diam.
+- Perangkat tanpa WebGL tetap menampilkan hero utuh, hanya tanpa latar garis (terdeteksi diam-diam, tanpa galat).
 - Keadaan awal animasi hanya aktif bila kelas `js` terpasang di `<html>` (skrip inline di `Layout.astro`), sehingga konten tetap terbaca bila JavaScript gagal dimuat.
 - Atribut yang tersedia: `data-line` (rule tergambar), `data-split` (judul naik per kata saat masuk viewport), `data-scrub` (teks menyala mengikuti scroll), `data-reveal` / `data-reveal-group` (muncul saat masuk viewport), `data-magnetic` (tarik ke kursor).
 
@@ -113,7 +115,7 @@ Catatan:
 
 - **Bun**: package manager & runtime.
 - **Astro 7**: Static site builder dengan JavaScript minimal.
-- **GSAP**, **Motion**, **Lenis**: sistem animasi (lihat di atas).
+- **GSAP**, **Motion**, **Lenis**, **Three.js**: sistem animasi dan grafis (lihat di atas).
 - **Tailwind CSS 4** (via `@tailwindcss/vite`): saat ini hanya dipakai untuk preflight (reset); styling utama memakai CSS dengan design token di `src/styles/global.css`.
 - **React 19**: integrasi Astro masih aktif, namun saat ini belum ada komponen React.
 - **Geist**, **Geist Mono**, **Instrument Serif**: tipografi (Google Fonts).

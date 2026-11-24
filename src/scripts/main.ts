@@ -9,7 +9,6 @@ import { initCursor } from './cursor';
 import { reduceMotion } from './env';
 import { initFooter } from './footer';
 import { initHeader } from './header';
-import { initHeroField } from './heroField';
 import { addHeroToIntro, buildIntro } from './intro';
 import { initLines } from './lines';
 import { initMagnetic } from './magnetic';
@@ -30,6 +29,14 @@ const fontsReady = () =>
 		new Promise((resolve) => setTimeout(resolve, 1200)),
 	]);
 
+/** Three.js dimuat terpisah (dynamic import) dan hanya bila halaman memiliki hero. */
+const loadHeroScene = () => {
+	if (!document.querySelector('[data-hero-field]')) return;
+	import('./heroScene')
+		.then((m) => m.initHeroScene())
+		.catch(() => {});
+};
+
 async function boot() {
 	await fontsReady();
 
@@ -40,7 +47,7 @@ async function boot() {
 	if (reduceMotion) {
 		initHeader(null);
 		initBackToTop(null);
-		initHeroField();
+		loadHeroScene();
 		document.documentElement.dataset.ready = '1';
 		return;
 	}
@@ -51,7 +58,7 @@ async function boot() {
 	// urutan penting: ScrollTrigger dibuat sesuai urutan halaman, section ber-pin lebih dulu
 	const intro = buildIntro();
 	addHeroToIntro(intro);
-	initHeroField();
+	loadHeroScene();
 	initHeader(lenis);
 	initAbout();
 	initSkills(lenis);

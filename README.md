@@ -101,13 +101,13 @@ Tampilan dirancang dengan bahasa visual **garis**: garis pemandu vertikal, rule 
 | --- | --- |
 | **GSAP** (ScrollTrigger, SplitText, DrawSVG) | Intro timeline, judul per-kata/huruf, galeri horizontal ter-pin, parallax, rule & bingkai yang tergambar, marquee, medan garis di canvas |
 | **Motion** | Reveal berbasis `inView`, garis progres scroll, spring pada menu/nav/hover/tombol magnetik, kursor, popup "kembali ke atas" (muncul dengan spring + cincin progres), penyaring daftar |
-| **Three.js** (WebGL) | Latar hero: lanskap garis 3D dalam satu draw call; gelombang, riak kursor, dan amplitudo-saat-digulir dihitung di vertex shader; warna mengikuti tema; render berhenti saat hero tidak terlihat. Dimuat sebagai chunk terpisah (`scripts/heroScene.ts`, dynamic import) hanya di halaman yang punya hero |
+| **Three.js** (WebGL) | Hero 3D: (1) lanskap garis dengan gelombang, riak kursor, dan amplitudo-saat-digulir yang dihitung di vertex shader (`scripts/heroScene.ts`); (2) objek *torus knot* wireframe dengan kedalaman terbaca dari kecerahan garis, miring mengikuti kursor; (3) *eksperimen, nonaktif*: foto sebagai relief 3D (`scripts/portraitRelief.ts`, saklar `FEATURES.portraitRelief`). Kecerahan foto dipakai sebagai kedalaman sehingga wajah tampak terdistorsi, jadi foto asli ditampilkan apa adanya. Warna mengikuti tema, render berhenti saat hero tidak terlihat. Semuanya dimuat sebagai chunk terpisah (dynamic import) hanya di halaman yang punya hero |
 | **Lenis** | Smooth scroll yang disinkronkan ke ticker GSAP (`scripts/smooth.ts`) |
 
 Catatan:
 
-- `prefers-reduced-motion: reduce` dihormati: tanpa Lenis, tanpa pin, tanpa scrub — konten tampil statis, dan latar Three.js dirender sebagai satu bingkai diam.
-- Perangkat tanpa WebGL tetap menampilkan hero utuh, hanya tanpa latar garis (terdeteksi diam-diam, tanpa galat).
+- `prefers-reduced-motion: reduce` dihormati: tanpa Lenis, tanpa pin, tanpa scrub — konten tampil statis, dan scene Three.js dirender sebagai satu bingkai diam.
+- Perangkat tanpa WebGL tetap menampilkan hero utuh: foto asli tampil penuh, hanya tanpa latar garis, objek 3D, dan relief (terdeteksi diam-diam, tanpa galat).
 - Keadaan awal animasi hanya aktif bila kelas `js` terpasang di `<html>` (skrip inline di `Layout.astro`), sehingga konten tetap terbaca bila JavaScript gagal dimuat.
 - Atribut yang tersedia: `data-line` (rule tergambar), `data-split` (judul naik per kata saat masuk viewport), `data-scrub` (teks menyala mengikuti scroll), `data-reveal` / `data-reveal-group` (muncul saat masuk viewport), `data-magnetic` (tarik ke kursor).
 

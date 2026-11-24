@@ -5,6 +5,7 @@ import { SplitText } from 'gsap/SplitText';
 
 import { initAbout } from './about';
 import { initBackToTop } from './backToTop';
+import { FEATURES } from '../components/data/site.js';
 import { initCursor } from './cursor';
 import { reduceMotion } from './env';
 import { initFooter } from './footer';
@@ -35,6 +36,12 @@ const loadHeroScene = () => {
 	import('./heroScene')
 		.then((m) => m.initHeroScene())
 		.catch(() => {});
+	// eksperimen relief 3D dari foto — nonaktif secara bawaan (lihat FEATURES.portraitRelief)
+	if (FEATURES.portraitRelief) {
+		import('./portraitRelief')
+			.then((m) => m.initPortraitRelief())
+			.catch(() => {});
+	}
 };
 
 async function boot() {

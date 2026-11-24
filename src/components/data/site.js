@@ -2,6 +2,8 @@
 /** Saklar fitur. `blog: false` menyembunyikan blog (menu, bagian beranda, halaman /blog) tanpa menghapus artikelnya. */
 export const FEATURES = {
 	blog: false,
+	/** relief 3D dari foto hero (eksperimen): kecerahan dipakai sebagai kedalaman sehingga wajah terdistorsi — nonaktif */
+	portraitRelief: false,
 };
 
 export const SITE = {

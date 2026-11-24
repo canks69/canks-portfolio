@@ -5,15 +5,19 @@ import {
 	Color,
 	ColorManagement,
 	Float32BufferAttribute,
+	Group,
 	LineSegments,
+	MathUtils,
 	PerspectiveCamera,
 	Plane,
 	Raycaster,
 	Scene,
 	ShaderMaterial,
+	TorusKnotGeometry,
 	Vector2,
 	Vector3,
 	WebGLRenderer,
+	WireframeGeometry,
 } from 'three';
 import { qs, reduceMotion } from './env';
 
@@ -23,6 +27,11 @@ import { qs, reduceMotion } from './env';
  * Puluhan garis sejajar membentuk "lanskap kontur" yang digambar dalam satu draw call (LineSegments).
  * Seluruh pergeseran dihitung di vertex shader (GPU): gelombang yang mengalir, riak yang mengikuti kursor,
  * dan amplitudo yang menguat saat halaman digulir. Kamera bergeser tipis mengikuti kursor (parallax 3D).
+ *
+ * Di atasnya melayang objek 3D: simpul torus (torus knot) dari garis wireframe. Kedalamannya terbaca dari
+ * kecerahan (bagian depan terang, belakang redup), pita aksen mengalir di permukaannya, dan objek berputar,
+ * miring mengikuti kursor, serta menyusut & memudar saat hero digulir. Objek ditempel pada kamera sehingga
+ * posisinya di layar selalu di area kosong kanan-bawah.
  *
  * Dimuat lewat dynamic import dari main.ts — halaman tanpa hero tidak ikut mengunduh Three.js.
  */
@@ -77,6 +86,41 @@ const FRAGMENT = /* glsl */ `
 		vec3 color = mix(uFg, uAccent, vAccent);
 		float alpha = mix(uAlphaBase, uAlphaAccent, vAccent) * vFade;
 		gl_FragColor = vec4(color, alpha);
+	}
+`;
+
+const KNOT_VERTEX = /* glsl */ `
+	uniform float uTime;
+	uniform float uCenterDist;
+	uniform float uRadius;
+	varying float vDepth;
+	varying float vBand;
+
+	void main() {
+		vec4 mv = modelViewMatrix * vec4(position, 1.0);
+		gl_Position = projectionMatrix * mv;
+
+		// kedalaman relatif terhadap pusat objek: depan = 1 (terang), belakang = 0 (redup)
+		float k = (-mv.z - uCenterDist) / uRadius;
+		vDepth = 1.0 - smoothstep(-1.0, 1.0, k);
+
+		// pita aksen yang mengalir melintasi permukaan
+		float wave = sin(position.x * 2.3 + position.y * 3.1 + position.z * 2.7 + uTime * 1.4) * 0.5 + 0.5;
+		vBand = smoothstep(0.86, 0.96, wave);
+	}
+`;
+
+const KNOT_FRAGMENT = /* glsl */ `
+	uniform vec3 uFg;
+	uniform vec3 uAccent;
+	uniform float uOpacity;
+	varying float vDepth;
+	varying float vBand;
+
+	void main() {
+		vec3 color = mix(uFg, uAccent, vBand);
+		float alpha = mix(0.07, 0.62, vDepth) * mix(1.0, 1.6, vBand) * uOpacity;
+		gl_FragColor = vec4(color, min(alpha, 0.95));
 	}
 `;
 
@@ -160,6 +204,48 @@ export function initHeroScene() {
 	const camera = new PerspectiveCamera(38, 1, 0.1, 60);
 	const CAMERA_BASE = new Vector3(0, 3.1, 8.4);
 	camera.position.copy(CAMERA_BASE);
+	scene.add(camera); // anak kamera (objek 3D) hanya dirender bila kamera ada di scene
+
+	// ---- objek 3D: simpul torus dari garis ----
+	const KNOT_DIST = 7; // jarak objek dari kamera
+	const knotUniforms = {
+		uTime: uniforms.uTime, // dibagi dengan lanskap
+		uFg: uniforms.uFg,
+		uAccent: uniforms.uAccent,
+		uCenterDist: { value: KNOT_DIST },
+		uRadius: { value: 1.4 },
+		uOpacity: { value: 1 },
+	};
+	const knot = new LineSegments(
+		new WireframeGeometry(new TorusKnotGeometry(1, 0.3, small ? 140 : 240, small ? 12 : 18, 2, 3)),
+		new ShaderMaterial({
+			uniforms: knotUniforms,
+			vertexShader: KNOT_VERTEX,
+			fragmentShader: KNOT_FRAGMENT,
+			transparent: true,
+			depthTest: false,
+			depthWrite: false,
+		})
+	);
+	knot.frustumCulled = false;
+	knot.renderOrder = 2;
+	const pivot = new Group();
+	pivot.add(knot);
+	camera.add(pivot);
+
+	let knotScale = 0.85;
+	const intro = { v: reduceMotion ? 1 : 0 }; // 0 → 1: objek "tumbuh" saat halaman dibuka
+	const placeKnot = () => {
+		// letakkan objek di area kosong kanan-bawah layar, apa pun rasio layarnya
+		const halfH = Math.tan(MathUtils.degToRad(camera.fov / 2)) * KNOT_DIST;
+		const halfW = halfH * camera.aspect;
+		const portrait = camera.aspect < 1;
+		// potret: area kosong di kanan judul (di bawah foto); lanskap: kanan-bawah
+		pivot.position.set((portrait ? 0.56 : 0.58) * halfW, (portrait ? -0.3 : -0.56) * halfH, -KNOT_DIST);
+		// diameter objek ≈ 2,6 satuan: ±38% tinggi layar (lanskap) atau ±30% lebar layar (potret)
+		knotScale = portrait ? (0.3 * 2 * halfW) / 2.6 : (0.38 * 2 * halfH) / 2.6;
+		knotUniforms.uRadius.value = 1.45 * knotScale;
+	};
 
 	// ---- warna dari token CSS (dibaca ulang saat tema berganti) ----
 	const readColors = () => {
@@ -181,6 +267,7 @@ export function initHeroScene() {
 		camera.aspect = w / h;
 		camera.fov = camera.aspect < 1 ? 58 : 38; // layar potret: sudut pandang lebih lebar
 		camera.updateProjectionMatrix();
+		placeKnot();
 	};
 
 	// ---- interaksi ----
@@ -192,6 +279,7 @@ export function initHeroScene() {
 	let pointerInside = false;
 	let scrollTarget = 0;
 	const lookAt = new Vector3(0, 0.1, -2);
+	const tilt = new Vector2(0, 0);
 
 	const draw = (seconds: number) => {
 		uniforms.uTime.value = seconds;
@@ -214,6 +302,14 @@ export function initHeroScene() {
 		camera.position.y += (CAMERA_BASE.y + ndc.y * 0.25 - camera.position.y) * 0.04;
 		camera.position.z = CAMERA_BASE.z + uniforms.uScroll.value * 1.8;
 		camera.lookAt(lookAt);
+
+		// objek 3D: putar perlahan, miring mengikuti kursor, menyusut & memudar saat digulir
+		tilt.x += (ndc.y * 0.55 - tilt.x) * 0.05;
+		tilt.y += (ndc.x * 0.9 - tilt.y) * 0.05;
+		knot.rotation.set(0.35 + tilt.x, seconds * 0.22 + tilt.y, seconds * 0.05);
+		const away = Math.min(uniforms.uScroll.value / 0.5, 1); // 0..1 selama hero digulir keluar
+		pivot.scale.setScalar(knotScale * intro.v * (1 - away * 0.45));
+		knotUniforms.uOpacity.value = 1 - away * 0.9;
 
 		renderer.render(scene, camera);
 	};
@@ -260,6 +356,8 @@ export function initHeroScene() {
 		e.preventDefault();
 		active = false;
 	});
+
+	gsap.to(intro, { v: 1, duration: 2.4, ease: 'expo.out', delay: 0.9 });
 
 	gsap.ticker.add((time) => {
 		if (active) draw(time);

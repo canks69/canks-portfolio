@@ -35,7 +35,7 @@ const loadHeroScene = () => {
 	if (!document.querySelector('[data-hero-field]')) return;
 	import('./heroScene')
 		.then((m) => m.initHeroScene())
-		.catch(() => {});
+		.catch(() => document.querySelector<HTMLElement>('[data-hero-word]')?.removeAttribute('data-three'));
 	// eksperimen relief 3D dari foto — nonaktif secara bawaan (lihat FEATURES.portraitRelief)
 	if (FEATURES.portraitRelief) {
 		import('./portraitRelief')
@@ -44,7 +44,28 @@ const loadHeroScene = () => {
 	}
 };
 
+/** Bila WebGL ada, <h1> disiapkan untuk digantikan teks 3D (transparan sejak awal agar tidak berkedip). */
+const markWord3d = () => {
+	const word = document.querySelector<HTMLElement>('[data-hero-word]');
+	if (!word || !document.createElement('canvas').getContext('webgl2')) return;
+	word.dataset.three = 'pending';
+	// jaring pengaman: bila scene tidak sempat siap, tampilkan <h1> HTML apa adanya
+	setTimeout(() => {
+		if (word.dataset.three === 'pending') delete word.dataset.three;
+	}, 6000);
+};
+
+/** Objek 3D yang berubah bentuk mengikuti scroll: chunk terpisah, hanya di halaman yang punya [data-scene-stop]. */
+const loadScrollObject = () => {
+	// minimal dua stasiun (beranda): di halaman dalam hanya footer yang bertanda, objeknya tidak perlu tampil
+	if (reduceMotion || document.querySelectorAll('[data-scene-stop]').length < 2) return;
+	import('./scrollObject')
+		.then((m) => m.initScrollObject())
+		.catch(() => {});
+};
+
 async function boot() {
+	markWord3d();
 	await fontsReady();
 
 	// Gerak dikurangi: biarkan halaman statis (CSS sudah menampilkan semuanya).
@@ -83,6 +104,7 @@ async function boot() {
 
 	ScrollTrigger.refresh();
 	scrollToHash(lenis);
+	loadScrollObject();
 	window.addEventListener('load', () => ScrollTrigger.refresh());
 
 	document.documentElement.dataset.ready = '1';

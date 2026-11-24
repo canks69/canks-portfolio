@@ -99,7 +99,7 @@ export function addHeroToIntro(tl: gsap.core.Timeline) {
 		gsap.set(foot, { autoAlpha: 1 });
 		tl.fromTo(Array.from(foot.children), { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.12 }, 1.5);
 	}
-	if (field) tl.to(field, { opacity: 1, duration: 2.4, ease: 'power2.out' }, 0.3);
+	if (field) tl.to(field, { opacity: 1, duration: 1.2, ease: 'power2.out' }, 0.2);
 
 	// isyarat gulir: garis terisi lalu mengosong, berulang
 	const cue = qs('[data-hero-cue]', hero);

@@ -5,21 +5,19 @@ import {
 	Color,
 	ColorManagement,
 	Float32BufferAttribute,
-	Group,
+	LinearSRGBColorSpace,
 	LineSegments,
-	MathUtils,
 	PerspectiveCamera,
 	Plane,
 	Raycaster,
 	Scene,
 	ShaderMaterial,
-	TorusKnotGeometry,
 	Vector2,
 	Vector3,
 	WebGLRenderer,
-	WireframeGeometry,
 } from 'three';
 import { qs, reduceMotion } from './env';
+import { createWordmark3D, type Wordmark3D } from './wordmark3d';
 
 /**
  * Hero: medan garis 3D dengan Three.js (WebGL).
@@ -28,10 +26,7 @@ import { qs, reduceMotion } from './env';
  * Seluruh pergeseran dihitung di vertex shader (GPU): gelombang yang mengalir, riak yang mengikuti kursor,
  * dan amplitudo yang menguat saat halaman digulir. Kamera bergeser tipis mengikuti kursor (parallax 3D).
  *
- * Di atasnya melayang objek 3D: simpul torus (torus knot) dari garis wireframe. Kedalamannya terbaca dari
- * kecerahan (bagian depan terang, belakang redup), pita aksen mengalir di permukaannya, dan objek berputar,
- * miring mengikuti kursor, serta menyusut & memudar saat hero digulir. Objek ditempel pada kamera sehingga
- * posisinya di layar selalu di area kosong kanan-bawah.
+ * (Objek 3D yang berubah bentuk mengikuti scroll ada di scripts/scrollObject.ts.)
  *
  * Dimuat lewat dynamic import dari main.ts — halaman tanpa hero tidak ikut mengunduh Three.js.
  */
@@ -70,6 +65,10 @@ const VERTEX = /* glsl */ `
 
 		// garis jauh memudar, garis dekat lebih tegas
 		vFade = smoothstep(44.0, 9.0, -mv.z);
+
+		// memudar di tepi atas & bawah hero (sebelumnya mask CSS pada kanvas: transparan → penuh di 18% … 70% → transparan)
+		float t = (1.0 - gl_Position.y / gl_Position.w) * 0.5;
+		vFade *= smoothstep(0.0, 0.18, t) * (1.0 - smoothstep(0.7, 1.0, t));
 		vAccent = aAccent;
 	}
 `;
@@ -89,48 +88,16 @@ const FRAGMENT = /* glsl */ `
 	}
 `;
 
-const KNOT_VERTEX = /* glsl */ `
-	uniform float uTime;
-	uniform float uCenterDist;
-	uniform float uRadius;
-	varying float vDepth;
-	varying float vBand;
-
-	void main() {
-		vec4 mv = modelViewMatrix * vec4(position, 1.0);
-		gl_Position = projectionMatrix * mv;
-
-		// kedalaman relatif terhadap pusat objek: depan = 1 (terang), belakang = 0 (redup)
-		float k = (-mv.z - uCenterDist) / uRadius;
-		vDepth = 1.0 - smoothstep(-1.0, 1.0, k);
-
-		// pita aksen yang mengalir melintasi permukaan
-		float wave = sin(position.x * 2.3 + position.y * 3.1 + position.z * 2.7 + uTime * 1.4) * 0.5 + 0.5;
-		vBand = smoothstep(0.86, 0.96, wave);
-	}
-`;
-
-const KNOT_FRAGMENT = /* glsl */ `
-	uniform vec3 uFg;
-	uniform vec3 uAccent;
-	uniform float uOpacity;
-	varying float vDepth;
-	varying float vBand;
-
-	void main() {
-		vec3 color = mix(uFg, uAccent, vBand);
-		float alpha = mix(0.07, 0.62, vDepth) * mix(1.0, 1.6, vBand) * uOpacity;
-		gl_FragColor = vec4(color, min(alpha, 0.95));
-	}
-`;
-
 export function initHeroScene() {
 	const hero = qs('[data-hero]');
 	const canvas = qs<HTMLCanvasElement>('[data-hero-field]');
-	if (!hero || !canvas) return;
+	const word = qs('[data-hero-word]', hero ?? document);
+	// tanda "menunggu teks 3D" dari main.ts — dihapus bila teks 3D tidak jadi dipakai sehingga <h1> HTML terlihat
+	const releaseWord = () => word && delete word.dataset.three;
+	if (!hero || !canvas) return releaseWord();
 
 	// Deteksi WebGL diam-diam (kanvas sementara) supaya perangkat tanpa WebGL tidak memunculkan galat di konsol
-	if (!document.createElement('canvas').getContext('webgl2') && !document.createElement('canvas').getContext('webgl')) return;
+	if (!document.createElement('canvas').getContext('webgl2') && !document.createElement('canvas').getContext('webgl')) return releaseWord();
 
 	// warna diberikan apa adanya (sRGB) ke shader
 	ColorManagement.enabled = false;
@@ -139,9 +106,10 @@ export function initHeroScene() {
 	try {
 		renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
 	} catch {
-		return; // WebGL tidak tersedia: hero tetap tampil tanpa latar garis
+		return releaseWord(); // WebGL tidak tersedia: hero tetap tampil tanpa latar garis
 	}
 	renderer.setClearColor(0x000000, 0);
+	renderer.outputColorSpace = LinearSRGBColorSpace; // warna sudah dalam sRGB; jangan dikonversi lagi (material berpencahayaan)
 
 	const small = window.innerWidth < 700;
 	const LINES = small ? 34 : 54;
@@ -206,54 +174,36 @@ export function initHeroScene() {
 	camera.position.copy(CAMERA_BASE);
 	scene.add(camera); // anak kamera (objek 3D) hanya dirender bila kamera ada di scene
 
-	// ---- objek 3D: simpul torus dari garis ----
-	const KNOT_DIST = 7; // jarak objek dari kamera
-	const knotUniforms = {
-		uTime: uniforms.uTime, // dibagi dengan lanskap
-		uFg: uniforms.uFg,
-		uAccent: uniforms.uAccent,
-		uCenterDist: { value: KNOT_DIST },
-		uRadius: { value: 1.4 },
-		uOpacity: { value: 1 },
-	};
-	const knot = new LineSegments(
-		new WireframeGeometry(new TorusKnotGeometry(1, 0.3, small ? 140 : 240, small ? 12 : 18, 2, 3)),
-		new ShaderMaterial({
-			uniforms: knotUniforms,
-			vertexShader: KNOT_VERTEX,
-			fragmentShader: KNOT_FRAGMENT,
-			transparent: true,
-			depthTest: false,
-			depthWrite: false,
-		})
-	);
-	knot.frustumCulled = false;
-	knot.renderOrder = 2;
-	const pivot = new Group();
-	pivot.add(knot);
-	camera.add(pivot);
-
-	let knotScale = 0.85;
-	const intro = { v: reduceMotion ? 1 : 0 }; // 0 → 1: objek "tumbuh" saat halaman dibuka
-	const placeKnot = () => {
-		// letakkan objek di area kosong kanan-bawah layar, apa pun rasio layarnya
-		const halfH = Math.tan(MathUtils.degToRad(camera.fov / 2)) * KNOT_DIST;
-		const halfW = halfH * camera.aspect;
-		const portrait = camera.aspect < 1;
-		// potret: area kosong di kanan judul (di bawah foto); lanskap: kanan-bawah
-		pivot.position.set((portrait ? 0.56 : 0.58) * halfW, (portrait ? -0.3 : -0.56) * halfH, -KNOT_DIST);
-		// diameter objek ≈ 2,6 satuan: ±38% tinggi layar (lanskap) atau ±30% lebar layar (potret)
-		knotScale = portrait ? (0.3 * 2 * halfW) / 2.6 : (0.38 * 2 * halfH) / 2.6;
-		knotUniforms.uRadius.value = 1.45 * knotScale;
-	};
+	// ---- teks 3D "CANKS": menggantikan <h1> secara visual (HTML-nya tetap ada, transparan) ----
+	const WORD_DIST = 7;
+	let wordmark: Wordmark3D | null = null;
+	let wordFont = 0; // ukuran font <h1> (px), diperbarui saat resize
+	if (word && word.dataset.three === 'pending') {
+		try {
+			wordmark = createWordmark3D('CANKS', WORD_DIST, reduceMotion);
+			camera.add(wordmark.pivot, wordmark.lights);
+			word.dataset.three = 'on';
+		} catch {
+			wordmark = null;
+			releaseWord();
+		}
+	}
 
 	// ---- warna dari token CSS (dibaca ulang saat tema berganti) ----
 	const readColors = () => {
 		const css = getComputedStyle(document.documentElement);
 		const fg = css.getPropertyValue('--fg').trim();
 		const accent = css.getPropertyValue('--accent').trim();
+		const accentFill = css.getPropertyValue('--accent-fill').trim() || accent;
+		const bg = css.getPropertyValue('--bg').trim();
 		if (fg) uniforms.uFg.value.set(fg);
 		if (accent) uniforms.uAccent.value.set(accent);
+		// teks 3D: depan = warna teks situs persis; sisi = nada tengah antara teks & latar (netral, ikut tema);
+		// cahaya tepi = lime penuh (--accent-fill) — hanya sapuan tipis di sisi kanan huruf
+		if (wordmark && fg && bg) {
+			const side = new Color(fg).lerp(new Color(bg), 0.4);
+			wordmark.setColors(uniforms.uFg.value, side, new Color(accentFill));
+		}
 	};
 	readColors();
 
@@ -267,7 +217,7 @@ export function initHeroScene() {
 		camera.aspect = w / h;
 		camera.fov = camera.aspect < 1 ? 58 : 38; // layar potret: sudut pandang lebih lebar
 		camera.updateProjectionMatrix();
-		placeKnot();
+		if (word) wordFont = parseFloat(getComputedStyle(word).fontSize);
 	};
 
 	// ---- interaksi ----
@@ -279,7 +229,6 @@ export function initHeroScene() {
 	let pointerInside = false;
 	let scrollTarget = 0;
 	const lookAt = new Vector3(0, 0.1, -2);
-	const tilt = new Vector2(0, 0);
 
 	const draw = (seconds: number) => {
 		uniforms.uTime.value = seconds;
@@ -303,13 +252,18 @@ export function initHeroScene() {
 		camera.position.z = CAMERA_BASE.z + uniforms.uScroll.value * 1.8;
 		camera.lookAt(lookAt);
 
-		// objek 3D: putar perlahan, miring mengikuti kursor, menyusut & memudar saat digulir
-		tilt.x += (ndc.y * 0.55 - tilt.x) * 0.05;
-		tilt.y += (ndc.x * 0.9 - tilt.y) * 0.05;
-		knot.rotation.set(0.35 + tilt.x, seconds * 0.22 + tilt.y, seconds * 0.05);
-		const away = Math.min(uniforms.uScroll.value / 0.5, 1); // 0..1 selama hero digulir keluar
-		pivot.scale.setScalar(knotScale * intro.v * (1 - away * 0.45));
-		knotUniforms.uOpacity.value = 1 - away * 0.9;
+		// teks 3D mengikuti posisi <h1> (termasuk parallax GSAP saat digulir)
+		if (wordmark && word) {
+			wordmark.update({
+				camera,
+				distance: WORD_DIST,
+				canvasRect: canvas.getBoundingClientRect(),
+				wordRect: word.getBoundingClientRect(),
+				fontSize: wordFont,
+				ndc,
+				seconds,
+			});
+		}
 
 		renderer.render(scene, camera);
 	};
@@ -357,7 +311,7 @@ export function initHeroScene() {
 		active = false;
 	});
 
-	gsap.to(intro, { v: 1, duration: 2.4, ease: 'expo.out', delay: 0.9 });
+	wordmark?.playIntro();
 
 	gsap.ticker.add((time) => {
 		if (active) draw(time);

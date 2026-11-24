@@ -4,7 +4,7 @@ import { FEATURES } from '../data/site.js';
 const year = new Date().getFullYear();
 ---
 
-<section class="hero" id="top" data-hero>
+<section class="hero" id="top" data-hero data-scene-stop="hero">
 	<canvas class="hero__field" data-hero-field aria-hidden="true"></canvas>
 
 	<div class="wrap hero__inner">
@@ -70,8 +70,7 @@ const year = new Date().getFullYear();
 		inset: 0;
 		width: 100%;
 		height: 100%;
-		-webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 70%, transparent);
-		mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 70%, transparent);
+		/* fade atas/bawah untuk garis latar ada di shader (heroScene.ts) agar teks & objek 3D tidak ikut memudar */
 		pointer-events: none;
 	}
 	:global(.js) .hero__field {
@@ -215,6 +214,11 @@ const year = new Date().getFullYear();
 	}
 
 	/* ---- kata besar ---- */
+	/* teks 3D (Three.js) menggantikan tampilan <h1>; HTML-nya tetap ada untuk SEO & pembaca layar.
+	   Atribut dipasang main.ts dan dihapus bila teks 3D tidak jadi dipakai (mis. tanpa WebGL). */
+	.hero__word[data-three] {
+		color: transparent;
+	}
 	.hero__word {
 		margin: 0;
 		font-size: min(21vw, 31svh);
@@ -263,7 +267,7 @@ const year = new Date().getFullYear();
 			justify-items: start;
 		}
 		.hero__portrait {
-			width: min(62vw, 15rem);
+			width: min(52vw, 12.5rem);
 			order: -1;
 		}
 		.hero__lead {
